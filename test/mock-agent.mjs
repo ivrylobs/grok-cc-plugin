@@ -39,17 +39,20 @@ async function handlePrompt(id, { sessionId, prompt }) {
     chunk(sessionId, `I wrote '${mem}'.\nRESULT:\n\`\`\`json\n{"summary":"earlier I wrote ${mem}","files_changed":[],"verification":"memory"}\n\`\`\`\nSTATUS: DONE`)
     return reply(id, { stopReason: 'end_turn' })
   }
-  // shell command task -> permission flow
-  const sh = text.match(/`(touch [^`]+)`/)
+  // shell command task -> permission flow (any backticked command when 'shell'/'bash' is asked)
+  const sh = /shell|bash/i.test(text) && text.match(/`((?:touch|mkdir|rm|git|echo)[^`]*)`/)
   if (sh) {
+    const cmd = sh[1]
     const outcome = await request('session/request_permission', {
       sessionId,
-      toolCall: { toolCallId: 'call-mock-1', kind: 'execute', title: `Execute \`${sh[1]}\``, rawInput: { variant: 'Bash', command: sh[1] } },
+      toolCall: { toolCallId: 'call-mock-1', kind: 'execute', title: `Execute \`${cmd}\``, rawInput: { variant: 'Bash', command: cmd } },
       options: [{ optionId: 'allow-once', kind: 'allow_once' }, { optionId: 'reject-once', kind: 'reject_once' }],
     })
     if (outcome?.outcome?.optionId === 'allow-once') {
-      fs.writeFileSync(path.join(s.cwd, sh[1].split(/\s+/)[1]), '')
-      chunk(sessionId, 'RESULT:\n```json\n{"summary":"touched","files_changed":[],"verification":"shell"}\n```\nSTATUS: DONE')
+      const [bin, arg] = cmd.split(/\s+/)
+      if (bin === 'mkdir') fs.mkdirSync(path.join(s.cwd, arg), { recursive: true })
+      else if (bin === 'touch') fs.writeFileSync(path.join(s.cwd, arg), '')
+      chunk(sessionId, 'RESULT:\n```json\n{"summary":"ran","files_changed":[],"verification":"shell"}\n```\nSTATUS: DONE')
       return reply(id, { stopReason: 'end_turn' })
     }
     return reply(id, { stopReason: 'cancelled' })
