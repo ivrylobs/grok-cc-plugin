@@ -20,6 +20,12 @@ test('advise asks for mutating or unknown', () => {
   assert.equal(decideToolCall('advise', { kind: 'fetch', rawInput: {} }), 'ask')
 })
 
+test('advise auto-allows in-tree write/edit/read (mediator contains them)', () => {
+  assert.equal(decideToolCall('advise', { kind: 'edit', title: 'Write `a.txt`', rawInput: { file_path: 'a.txt' } }), 'allow')
+  assert.equal(decideToolCall('advise', { kind: 'write', rawInput: { file_path: 'b.txt' } }), 'allow')
+  assert.equal(decideToolCall('advise', { kind: 'read', rawInput: { file_path: 'c.txt' } }), 'allow')
+})
+
 test('leash allows most, asks on deny-list', () => {
   assert.equal(decideToolCall('leash', exec('npm install left-pad')), 'allow')
   assert.equal(decideToolCall('leash', { kind: 'fetch', rawInput: {} }), 'allow')
