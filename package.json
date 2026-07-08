@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --test test/",
-    "test:live": "GROK_CC_LIVE=1 node --test test/"
+    "test": "node --test",
+    "test:live": "GROK_CC_LIVE=1 node --test"
   }
 }
