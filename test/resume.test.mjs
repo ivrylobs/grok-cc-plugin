@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { LIVE, tmpHome, tmpWorkspace, driveUntil } from './helpers.mjs'
 
-test('kill child mid-session, resume restores memory', { skip: !LIVE && 'set GROK_CC_LIVE=1' }, async () => {
+test('kill child mid-session, resume restores memory', async () => {
   tmpHome()
   const ws = tmpWorkspace()
   const worker = await import('../lib/worker.mjs')

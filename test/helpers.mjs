@@ -3,10 +3,13 @@ import os from 'node:os'
 import path from 'node:path'
 
 export const LIVE = process.env.GROK_CC_LIVE === '1'
+export const MOCK_BIN = path.resolve('test/mock-agent.mjs')
 
+/** Fast tier by default: mock ACP agent. GROK_CC_LIVE=1 = real grok (truth pass). */
 export function tmpHome() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gcc-live-'))
   process.env.GROK_CC_HOME = d
+  if (!LIVE) process.env.GROK_CC_GROK_BIN = MOCK_BIN
   return d
 }
 

@@ -7,7 +7,7 @@ import { LIVE, tmpHome, tmpWorkspace } from './helpers.mjs'
 const CTL = path.resolve('bin/grokctl.mjs')
 const run = (args, env) => JSON.parse(execFileSync('node', [CTL, ...args], { env: { ...process.env, ...env }, encoding: 'utf8' }).trim())
 
-test('ctl auto-starts broker; wait blocks then wakes on worker event', { skip: !LIVE && 'set GROK_CC_LIVE=1' }, async () => {
+test('ctl auto-starts broker; wait blocks then wakes on worker event', async () => {
   const home = tmpHome()
   const env = { GROK_CC_HOME: home }
   const ws = tmpWorkspace()
@@ -23,7 +23,7 @@ test('ctl auto-starts broker; wait blocks then wakes on worker event', { skip: !
   run(['broker', 'stop'], env)
 })
 
-test('wait exits 2 on timeout with no workers', { skip: !LIVE && 'set GROK_CC_LIVE=1' }, async () => {
+test('wait exits 2 on timeout with no workers', async () => {
   const home = tmpHome()
   const env = { GROK_CC_HOME: home }
   const r = await new Promise(resolve => {

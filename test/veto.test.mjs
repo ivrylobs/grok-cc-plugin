@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { LIVE, tmpHome, tmpWorkspace, driveUntil } from './helpers.mjs'
 
-test('shell -> inbox -> deny -> not executed -> corrective say -> done', { skip: !LIVE && 'set GROK_CC_LIVE=1' }, async () => {
+test('shell -> inbox -> deny -> not executed -> corrective say -> done', async () => {
   tmpHome()
   const ws = tmpWorkspace()
   const worker = await import('../lib/worker.mjs')

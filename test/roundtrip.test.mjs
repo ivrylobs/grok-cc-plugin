@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { LIVE, tmpHome, tmpWorkspace, driveUntil } from './helpers.mjs'
 
-test('spawn -> mediated write -> DONE result -> audit trail', { skip: !LIVE && 'set GROK_CC_LIVE=1' }, async () => {
+test('spawn -> mediated write -> DONE result -> audit trail', async () => {
   tmpHome()
   const ws = tmpWorkspace()
   const store = await import('../lib/store.mjs')
