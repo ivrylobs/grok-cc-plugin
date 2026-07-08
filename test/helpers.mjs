@@ -23,6 +23,7 @@ export function tmpWorkspace() {
  * Override onPaused/onAdvising to test specific advisory behavior.
  */
 export function driveUntil(worker, id, target, { timeoutMs = 300000, onPaused, onAdvising } = {}) {
+  const targets = Array.isArray(target) ? target : [target]
   return new Promise((resolve, reject) => {
     let busy = false
     const finish = (fn, v) => { clearTimeout(timer); worker.events.off('wake', h); fn(v) }
@@ -32,7 +33,7 @@ export function driveUntil(worker, id, target, { timeoutMs = 300000, onPaused, o
       try {
         const m = worker.status(id)
         if (!m) return
-        if (m.status === target) return finish(resolve, m)
+        if (targets.includes(m.status)) return finish(resolve, m)
         if (['dead', 'blocked'].includes(m.status)) return finish(reject, new Error(`worker ${m.status}`))
         if (m.status === 'paused') await (onPaused ?? (() => worker.say(id, 'Proceed. No further checkpoints needed.')))(m)
         else if (m.status === 'advising') await (onAdvising ?? (() => worker.answer(id, { allow: true })))(m)

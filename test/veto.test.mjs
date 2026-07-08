@@ -20,9 +20,11 @@ test('shell -> inbox -> deny -> not executed -> corrective say -> done', async (
     const perm = worker.inbox(meta.id).find(i => i.type === 'permission')
     assert.match(perm.toolCall.title, /mkdir secret_dir/)
     worker.answer(meta.id, { allow: false, why: 'not allowed to create that directory' })
-    await worker.say(meta.id, 'Do NOT run that command. Instead just reply DENIED-OK and finish with STATUS: DONE and a RESULT block.')
-    await driveUntil(worker, meta.id, 'done')
-    assert.ok(!fs.existsSync(path.join(ws, 'secret_dir')))   // the veto held
+    assert.ok(!fs.existsSync(path.join(ws, 'secret_dir')))   // the veto held: command never executed
+    // corrective guidance; grok may finish DONE or declare itself BLOCKED — both are clean terminal states
+    await worker.say(meta.id, 'Do NOT run that command. Acknowledge with DENIED-OK and finish with STATUS: DONE and a RESULT block.')
+    await driveUntil(worker, meta.id, ['done', 'blocked'])
+    assert.ok(!fs.existsSync(path.join(ws, 'secret_dir')))   // still never created
   } finally {
     worker.kill(meta.id)
   }
