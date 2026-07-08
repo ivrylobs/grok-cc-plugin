@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "test:live": "GROK_CC_LIVE=1 node --test --test-concurrency=1 test/*.test.mjs"
+    "test:live": "GROK_CC_LIVE=1 node --test --test-concurrency=1 test/*.test.mjs",
+    "e2e": "GROK_CC_LIVE=1 node test/e2e-live.mjs"
   }
 }
