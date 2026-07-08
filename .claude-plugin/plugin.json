@@ -1,0 +1,5 @@
+{
+  "name": "grok",
+  "description": "Claude advises, Grok works: veto-gated resumable Grok worker fleet over ACP",
+  "version": "0.1.0"
+}
