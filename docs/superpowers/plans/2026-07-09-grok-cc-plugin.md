@@ -1246,3 +1246,14 @@ git tag v0.1.0
 - **Spec coverage:** §4.1 grokd (T7), fs mediation (T4), permission gate+timeout (T6), wake bridge (T7 wait + T8 ctl + T9 loop skill), lifecycle ops incl. fork-honest-error (T7), §4.2 grokctl (T8), §4.3 commands/skills/hooks/agent (T9), §5 policy+contract+loop (T3, T2, T9), §6 error handling (dead→resume T6/T7, MCP suppression T6 `mcpServers: []`, STATUS drift T2, capability drift T5 probes), §7 six tests (T1,T2,T3,T4 offline containment variant + handshake T5, roundtrip+veto T6, resume T7, wait T8), §8 scope respected, §9 criteria (T10).
 - **Placeholder scan:** fork op intentionally ships an honest unsupported error (spec §8 defers worktree/fork orchestration; the command surface exists per §4.3) — explicit, not a TBD.
 - **Type consistency:** store/contract/policy/fs-mediator signatures used in worker.mjs and grokd match their Interfaces blocks verbatim; inbox item shapes consistent across worker.mjs, grokd wait, and advise.md.
+
+---
+
+### Task 11: Benchmark vs codex plugin — [CAPTAIN] (added mid-execution by user)
+
+After Task 10 E2E passes:
+
+- [ ] **Step 1:** Run the same 3 tasks (planted bugfix, YAGNI refactor, cross-repo trace — reuse the duel seeds) through `/grok:work` and through the codex plugin's rescue path. Record: correctness, wall-clock, orchestrator tokens.
+- [ ] **Step 2:** Capability matrix, measured not claimed: mid-task veto, worker-asks-back (NEED_INPUT), push wake (zero polls), resume-after-death, per-file audit. Codex plugin scored on the same axes.
+- [ ] **Step 3:** Verdict: grok-cc-plugin must win on interactivity + staleness with correctness parity. If not → /loop improvement iterations until it does.
+- [ ] **Step 4:** Write benchmark results into README (honest numbers, including losses).
