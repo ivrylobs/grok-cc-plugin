@@ -14,6 +14,8 @@ Each row verified: grok-cc-plugin by its live test suite (`npm run test:live`) +
 | **Resume after death** — re-attach with full memory | ✅ | ✅ session transfer | both proven; grok: live `resume` test |
 | **Per-file audit** — every read/write logged with sha256 | ✅ `fs-audit.jsonl` | ⚠️ hashing in state, not per-file fs audit | grok: E2E (3 ops, hashes). codex: `sha256` in 2 files, job-level |
 | **Headless automatability** | ✅ clean ACP stdio | ❌ not runnable headless here | see below |
+| **`/command` argument hints** | ✅ all commands | ✅ all commands | was codex's only win; closed by adding `argument-hint`/`allowed-tools` frontmatter |
+| **Repeat-spawn latency** (same cwd) | ✅ **1.4 ms** warm | n/a — no pre-warm | cold 2205 ms → warm 1.4 ms; cwd miss falls back to cold (1735 ms) |
 
 ## Head-to-head task (fix a planted bug)
 
@@ -22,6 +24,7 @@ Same task — fix an off-by-one in `merge_intervals` so `python3 intervals.py` p
 | Agent | Correct | Wall-clock | Notes |
 |---|---|---|---|
 | **grok-cc-plugin** (`--grip leash`) | ✅ yes | **16.0 s** | spawned, fixed, verified, `done` — zero human touches |
+| **grok-cc-plugin** (warm, same cwd) | ✅ yes | **~13.9 s** *(derived)* | the same run minus the 2.1 s pre-prompt the warm pool removes — not a fresh timing; only the pre-prompt segment was measured (2205 ms → 1.4 ms) |
 | **codex exec** | — | — | **could not run**: `codex exec --full-auto`, `--dangerously-bypass-approvals-and-sandbox`, and even `codex login status` all hung with no output in this environment |
 
 The codex CLI is not scriptable headless here (interactive-auth / approval gated). This is not a correctness loss — it's an **automatability finding**: grok's headless ACP drove ~40 clean live runs during development; codex's raw CLI wouldn't script at all. It's precisely why the codex plugin needs a persistent app-server broker to use codex at all, whereas grok-cc-plugin talks to `grok agent stdio` directly.

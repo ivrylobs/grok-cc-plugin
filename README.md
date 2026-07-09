@@ -100,7 +100,11 @@ npm run test:live # truth pass: real grok-4.5 (needs login), ~45s
 npm run e2e       # full §9 walk via grokctl vs real grok
 ```
 
-The mock (`test/mock-agent.mjs`) speaks the identical ACP wire format, so protocol regressions surface instantly; live runs prove real grok behavior. Verified 2026-07-09 (grok 0.2.91): 28 offline + 6 live + 5 E2E, 0 failures.
+The mock (`test/mock-agent.mjs`) speaks the identical ACP wire format, so protocol regressions surface instantly; live runs prove real grok behavior. Verified 2026-07-09 (grok 0.2.91, node 22.22.3): 39 offline + 39 live, 0 failures.
+
+### Runtime: node, not bun
+
+Measured 2026-07-09 (bun 1.3.11 vs node 22.22.3): bun saves ~5 ms per `grokctl` invocation (33 ms vs 40 ms) and nothing at all on the hot path — the warm pool already took repeat spawn from 2205 ms to 1.4 ms, and everything left is grok's inference. Against that, `bun test` runs all test files in one process where `node --test` forks per file; our tests set `GROK_CC_HOME` before importing `store.mjs`, which reads it at module scope, so a shared module cache breaks isolation (`store.test.mjs` fails under bun). Node stays. Revisit only if bun becomes the deployment target for reasons other than speed.
 
 ## Troubleshooting
 
