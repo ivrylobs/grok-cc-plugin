@@ -12,6 +12,12 @@ let lastActivity = Date.now()
 
 const ACTIVE = () => worker.list().filter(m => ['starting', 'running', 'advising', 'paused', 'need_input'].includes(m.status))
 
+function shutdown(code = 0) {
+  // Warm slot is broker-owned and never registered as a worker — must reap explicitly.
+  worker.killWarm()
+  process.exit(code)
+}
+
 const ops = {
   async ping() { return { pid: process.pid } },
   async spawn(args) {
@@ -50,7 +56,7 @@ const ops = {
       worker.events.on('wake', h)
     })
   },
-  async stop() { setTimeout(() => process.exit(0), 50); return { stopping: true } },
+  async stop() { setTimeout(() => shutdown(0), 50); return { stopping: true } },
 }
 
 function serve() {
@@ -80,10 +86,14 @@ function serve() {
   server.listen(SOCK, () => {
     fs.writeFileSync(SOCK + '.pid', String(process.pid))
     setInterval(() => {
-      if (!ACTIVE().length && Date.now() - lastActivity > IDLE_EXIT_MS) process.exit(0)
+      if (!ACTIVE().length && Date.now() - lastActivity > IDLE_EXIT_MS) shutdown(0)
     }, 10 * 60 * 1000).unref()
   })
 }
+
+process.on('exit', () => { try { worker.killWarm() } catch { /* shutting down */ } })
+process.on('SIGTERM', () => shutdown(0))
+process.on('SIGINT', () => shutdown(0))
 
 // single-instance: probe existing socket before claiming it
 const probe = net.connect(SOCK)
