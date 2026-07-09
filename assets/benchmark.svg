@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" width="720" height="380" role="img" aria-label="grok-cc proof scorecard: warm spawn ~1500x faster (2205ms to 1.4ms), a ~16s autonomous bug fix, a worker that asked for the secret key instead of inventing it, and 48 offline plus 48 live tests with 0 failures">
+  <title>grok-cc proof scorecard</title>
+  <desc>Four measured results in a 2 by 2 grid: warm-pool spawn ~1500x faster (2205ms to 1.4ms); a ~16 second autonomous bug fix with zero human touches under grip leash; a worker that asked for the secret key instead of inventing it; and 48 offline plus 48 live tests with 0 failures.</desc>
+
+  <rect width="720" height="380" fill="#E9E2D0"/>
+
+  <!-- divider rules -->
+  <g stroke="#C65E39" stroke-width="1" opacity="0.5">
+    <line x1="360" y1="44" x2="360" y2="336"/>
+    <line x1="44" y1="190" x2="676" y2="190"/>
+  </g>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" text-anchor="middle">
+
+    <!-- top-left: warm pool -->
+    <text x="200" y="108" fill="#111111" font-size="52" font-weight="800" letter-spacing="-0.02em">~1500&#215;</text>
+    <text x="200" y="140" fill="#111111" font-size="15" font-weight="600">faster repeat spawn</text>
+    <text x="200" y="162" fill="#C65E39" font-size="15" font-weight="700">2205 ms &#8594; 1.4 ms</text>
+    <text x="200" y="180" fill="#6B6255" font-size="12.5">warm pool, real grok</text>
+
+    <!-- top-right: autonomous fix -->
+    <text x="520" y="108" fill="#111111" font-size="52" font-weight="800" letter-spacing="-0.02em">~16 s</text>
+    <text x="520" y="140" fill="#111111" font-size="15" font-weight="600">autonomous bug fix</text>
+    <text x="520" y="162" fill="#6B6255" font-size="12.5">zero human touches</text>
+    <text x="520" y="180" fill="#6B6255" font-size="12.5">--grip leash</text>
+
+    <!-- bottom-left: asked, didn't invent -->
+    <text x="200" y="298" fill="#111111" font-size="40" font-weight="800" letter-spacing="-0.02em">it asked</text>
+    <text x="200" y="330" fill="#111111" font-size="15" font-weight="600">for the secret API key</text>
+    <text x="200" y="352" fill="#C65E39" font-size="14" font-weight="700">instead of inventing one</text>
+
+    <!-- bottom-right: tests -->
+    <text x="520" y="298" fill="#111111" font-size="52" font-weight="800" letter-spacing="-0.02em">48 + 48</text>
+    <text x="520" y="330" fill="#111111" font-size="15" font-weight="600">offline + live tests</text>
+    <text x="520" y="352" fill="#C65E39" font-size="15" font-weight="700">0 failures</text>
+  </g>
+</svg>

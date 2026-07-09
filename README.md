@@ -1,14 +1,23 @@
 # grok-cc-plugin
 
-### Claude captains. Grok implements. You veto mid-flight.
+<p align="center">
+  <img src="assets/hero.png" alt="grok-cc — Claude captains. Grok implements. You veto mid-flight." width="820">
+</p>
 
-A Claude Code plugin that turns Grok into a durable, veto-gated worker fleet. Claude designs and reviews; Grok workers run the tasks over the Agent Client Protocol (ACP) while Claude mediates their filesystem, gates every risky tool call **before it executes**, answers their questions, and never polls for results.
+<p align="center">
+  A Claude Code plugin that turns Grok into a durable, <strong>veto-gated</strong> worker fleet.<br>
+  Claude designs and reviews; Grok workers run the tasks over ACP while Claude gates every risky tool call <em>before it executes</em>.
+</p>
 
 > **Not** a Claude replacement, **not** an autonomous swarm, **not** a sandbox. What it adds that a raw `grok` shell-out can't: a mid-flight per-call **veto**, a blocking **NEED_INPUT** so a worker asks instead of inventing, **push-wake** (no polling), and a per-file **sha256 audit** — all measured, all reproducible below.
->
-> Verify the engineering with **no grok account**: `npm run proof`. Verify the model behavior with one: `npm run proof:live`.
 
-## Don't trust us — run it
+## Proof, not promises
+
+<p align="center">
+  <img src="assets/benchmark.svg" alt="Proof scorecard: warm spawn ~1500x faster (2205ms to 1.4ms), a ~16s autonomous bug fix, a worker that asked for the secret key instead of inventing it, and 48 offline + 48 live tests with 0 failures." width="720">
+</p>
+
+Every one of those numbers is reproducible **on your machine** — that's the whole pitch. Verify the engineering with no grok account, or the model behavior with one:
 
 ```text
 $ npm run proof            # offline · no network · no grok login · ~4s
@@ -82,6 +91,24 @@ Two more you don't see in the proof but get for free: **push-wake** (worker even
 
 You (via Claude) delegate a task with `/grok:work`. A broker daemon spawns a real `grok agent stdio` process and drives it over ACP. Every file the worker touches goes through Claude's mediator (contained to the workspace, sha256-audited); every risky tool call pauses for your veto; every question it raises wakes you. You stay the captain — Grok never runs unsupervised, and never silently runs on a model you didn't pick.
 
+```mermaid
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'-apple-system,Segoe UI,Roboto,sans-serif','primaryColor':'#E9E2D0','primaryBorderColor':'#111111','lineColor':'#C65E39','actorBkg':'#E9E2D0','actorBorder':'#111111','actorTextColor':'#111111','noteBkgColor':'#C65E39','noteTextColor':'#111111','noteBorderColor':'#111111'}}}%%
+sequenceDiagram
+  autonumber
+  participant You as You · Claude
+  participant Broker as grokd broker
+  participant Grok as Grok worker
+  You->>Grok: /grok:work "fix the failing test"
+  Grok->>Broker: tool call — run `rm -rf build`
+  Broker->>You: veto? (turn paused before it runs)
+  You-->>Broker: deny
+  Note over Grok: the command never executes
+  Grok->>Broker: NEED_INPUT — "what's the prod API key?"
+  Broker->>You: worker is asking (wakes you — no polling)
+  You-->>Grok: here's the key
+  Grok->>You: STATUS: DONE + result (you verify)
+```
+
 ```bash
 /grok:work fix the failing test in auth/           # delegate; a background wait arms itself
 # ... you get woken when it asks, finishes, or hits something risky ...
@@ -140,14 +167,22 @@ If grok **rejects** a model or effort, the worker posts an `error` to its inbox 
 
 ## Architecture
 
-```
-Claude Code (advisor)  ── commands / skills / hooks
-        │  grokctl (JSON over unix socket)
-        ▼
-     grokd (broker daemon)  ── worker pool, fs mediation, permission inbox, wake bridge
-        │  ACP (JSON-RPC/JSONL over stdio)
-        ▼
-   grok agent stdio × N   ── grok-4.5 (500k) / grok-composer-2.5-fast
+```mermaid
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'-apple-system,Segoe UI,Roboto,sans-serif','fontSize':'15px'}}}%%
+flowchart TB
+  C["Claude Code — the captain<br/>commands · skills · hooks · your veto"]
+  B["grokd — broker daemon<br/>worker pool · fs mediation · permission inbox · wake bridge"]
+  W["grok agent stdio × N<br/>grok-4.5 · grok-composer-2.5-fast"]
+  C -->|"grokctl · JSON over unix socket"| B
+  B -->|"ACP · JSON-RPC / JSONL over stdio"| W
+  W -.->|"fs read/write · contained + sha256 audited"| B
+  W -.->|"risky tool call · held for your veto"| B
+  classDef captain fill:#111111,color:#E9E2D0,stroke:#C65E39,stroke-width:2px;
+  classDef broker fill:#E9E2D0,color:#111111,stroke:#111111,stroke-width:2px;
+  classDef worker fill:#C65E39,color:#111111,stroke:#111111,stroke-width:2px;
+  class C captain
+  class B broker
+  class W worker
 ```
 
 - **grokd** — one Node daemon (stdlib only). Spawns a `grok agent stdio` child per worker, mediates `fs/read|write` (audit + containment + optional staging), holds `session/request_permission` calls open until you answer, and blocks `wait` until a worker event fires.
