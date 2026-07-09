@@ -8,6 +8,8 @@
   "repository": { "type": "git", "url": "https://github.com/ivrylobs/grok-cc-plugin.git" },
   "private": true,
   "scripts": {
+    "proof": "node scripts/proof.mjs",
+    "proof:live": "node scripts/proof-live.mjs",
     "test": "node --test test/*.test.mjs",
     "test:live": "GROK_CC_LIVE=1 node --test --test-concurrency=1 test/*.test.mjs",
     "e2e": "GROK_CC_LIVE=1 node test/e2e-live.mjs"
