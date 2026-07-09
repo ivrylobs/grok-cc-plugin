@@ -155,6 +155,30 @@ async function main() {
   const cmd = argv.shift()
   if (!cmd) throw new Error('usage: grokctl <cmd> ...')
 
+  // config + models need no broker: config.json is read by the broker at spawn time
+  if (cmd === 'config') {
+    const { readConfig, writeConfig, EFFORTS } = await import('../lib/config.mjs')
+    const model = takeFlag(argv, '--model')
+    const effort = takeFlag(argv, '--effort')
+    if (effort != null && effort !== 'none' && !EFFORTS.includes(effort)) {
+      throw new Error(`invalid --effort "${effort}"; expected ${EFFORTS.join('|')}`)
+    }
+    if (argv.length) throw new Error(`unexpected args: ${argv.join(' ')}`)
+    if (model == null && effort == null) { out(readConfig()); return }
+    // "none" clears a setting back to grok's default
+    out(writeConfig({
+      ...(model != null ? { model: model === 'none' ? null : model } : {}),
+      ...(effort != null ? { effort: effort === 'none' ? null : effort } : {}),
+    }))
+    return
+  }
+  if (cmd === 'models') {
+    const { execFileSync } = await import('node:child_process')
+    const bin = process.env.GROK_CC_GROK_BIN || (await import('node:path')).default.join((await import('node:os')).default.homedir(), '.grok/bin/grok')
+    process.stdout.write(execFileSync(bin, ['models'], { encoding: 'utf8' }))
+    return
+  }
+
   const skipAuto = cmd === 'broker' && (argv[0] === 'stop' || argv[0] === 'status')
 
   if (cmd === 'broker') {

@@ -34,6 +34,7 @@ Requires: Node ≥ 20, the `grok` CLI (0.2.91+) logged in (`grok login`). The Se
 | `/grok:resume <id>` | Re-attach a dead worker with memory intact |
 | `/grok:fork <id>` | Branch a worker's session (needs a grok build that supports it) |
 | `/grok:kill <id>` | Stop a worker |
+| `/grok:config [--model <id>] [--effort low\|medium\|high]` | Show or set the default worker model / reasoning effort |
 
 Under the hood everything is one CLI: `node bin/grokctl.mjs <op>` (JSON in/out). Commands are thin wrappers.
 
@@ -48,6 +49,26 @@ Set per worker with `--grip` on spawn (default `advise`):
 | `leash` | direct, audited | everything auto-runs except a deny-list (`rm -rf`, `git push`, `sudo`, `curl\|sh`) | trusted mechanical tasks |
 
 Containment (writes confined to the worker's cwd) is enforced by the fs-mediator regardless of grip — it's the backstop under every level.
+
+## Model & reasoning effort
+
+Workers never silently run on a model you didn't pick. Precedence, highest first:
+
+1. per-spawn flag — `/grok:work <task> --model grok-composer-2.5-fast --effort low`
+2. env — `GROK_CC_MODEL`, `GROK_CC_EFFORT`
+3. config — `/grok:config --model grok-4.5 --effort high` (persisted to `<GROK_CC_HOME>/config.json`)
+4. grok's own default (`grok-4.5`)
+
+```bash
+node bin/grokctl.mjs models                                  # valid model ids
+node bin/grokctl.mjs config --model grok-4.5 --effort high   # set defaults
+node bin/grokctl.mjs config                                  # show
+node bin/grokctl.mjs config --model none                     # clear -> grok default
+```
+
+Effort is `low` | `medium` | `high` (grok-4.5 only). Routing rule of thumb: `grok-composer-2.5-fast` for mechanical, spec-clamped work; `grok-4.5` for ambiguous debugging, cross-repo tracing, and refactors.
+
+If grok **rejects** a model or effort, the worker posts an `error` to its inbox saying so — it does not quietly fall back to the default. Verified 2026-07-09: requesting `grok-composer-2.5-fast` makes grok report that exact model on its own event stream.
 
 ## Architecture
 
