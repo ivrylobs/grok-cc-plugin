@@ -12,11 +12,16 @@ It replaces fire-and-hope CLI delegation with protocol-level control:
 
 ## Install
 
+A plugin installs from a marketplace. This repo is its own marketplace (`.claude-plugin/marketplace.json`), so add it as a local marketplace, then install:
+
 ```bash
-claude plugin install /path/to/grok-cc-plugin
+claude plugin marketplace add /path/to/grok-cc-plugin
+claude plugin install grok@grok-cc
 ```
 
-Requires: Node ≥ 20, the `grok` CLI (0.2.91+) logged in (`grok login`). The SessionStart hook auto-starts the broker.
+`marketplace add` also accepts a GitHub repo or URL. Uninstall with `claude plugin uninstall grok@grok-cc`; update after a pull with `claude plugin marketplace update grok-cc`.
+
+Requires: Node ≥ 20, the `grok` CLI (0.2.91+) logged in (`grok login`). The SessionStart hook auto-starts the broker; restart Claude Code (or start a new session) after install so the hook and `/grok:*` commands load.
 
 ## Commands
 
