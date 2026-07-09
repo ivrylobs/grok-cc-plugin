@@ -1,0 +1,26 @@
+{
+  "name": "grok-cc",
+  "owner": {
+    "name": "ivrylobs",
+    "email": "ivrylobs@gmail.com"
+  },
+  "metadata": {
+    "description": "Claude advises, Grok works: veto-gated resumable Grok worker fleet over ACP.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "grok",
+      "description": "Veto-gated, resumable Grok worker fleet driven by Claude over ACP.",
+      "version": "0.1.0",
+      "author": {
+        "name": "ivrylobs"
+      },
+      "license": "MIT",
+      "homepage": "https://github.com/ivrylobs/grok-cc-plugin",
+      "repository": "https://github.com/ivrylobs/grok-cc-plugin",
+      "keywords": ["grok", "acp", "agent", "delegation", "worker", "code-review"],
+      "source": "./"
+    }
+  ]
+}

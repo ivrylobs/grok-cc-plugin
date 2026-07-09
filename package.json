@@ -1,0 +1,15 @@
+{
+  "name": "grok-cc-plugin",
+  "version": "0.1.0",
+  "description": "Claude advises, Grok works: veto-gated resumable Grok worker fleet over ACP.",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/ivrylobs/grok-cc-plugin",
+  "repository": { "type": "git", "url": "https://github.com/ivrylobs/grok-cc-plugin.git" },
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:live": "GROK_CC_LIVE=1 node --test --test-concurrency=1 test/*.test.mjs",
+    "e2e": "GROK_CC_LIVE=1 node test/e2e-live.mjs"
+  }
+}

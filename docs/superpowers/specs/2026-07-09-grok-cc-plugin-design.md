@@ -88,7 +88,7 @@ Responsibilities:
 5. **Wake bridge** — `worker.wait {ids?, timeoutSec}` over the socket blocks until any watched worker gains an inbox item or terminates. `grokctl wait` is a thin caller; Claude runs it as a background Bash task and gets woken by the harness when it exits.
 6. **Lifecycle** — `worker.list/status/result/kill/resume`, `worker.say {id, text}` (new `session/prompt` on the same session — used both for answering NEED_INPUT and for corrective guidance after a deny), `worker.fork {id}` (via `_x.ai/session/fork` when the probe confirmed it; otherwise error with a clear message). Broker exits when idle > 2h with no workers (and on `broker.stop`).
 
-Concurrency: max 4 concurrent worker children by default (configurable via `GROK_CC_MAX_WORKERS`); further spawns queue.
+Concurrency: max 4 concurrent worker children by default (configurable via `GROK_CC_MAX_WORKERS`); a spawn past the cap is rejected with an error (the caller kills or waits, then retries) — v0.1.0 does not queue.
 
 ### 4.2 grokctl (CLI)
 
@@ -111,9 +111,11 @@ Thin socket client, one subcommand per broker op: `spawn`, `list`, `status <id>`
 |---|---|---|---|
 | `gate` | staged to `staged/`, applied only on `approve-stage` | every request → inbox | untrusted tasks, production trees |
 | `advise` (default) | direct, audited, workspace-contained | request → inbox unless it matches the allow-list (read-only commands: `ls`, `cat`, `grep`, `git status/diff/log`, test runners `pytest`/`npm test`/`cargo test`) | normal work |
-| `leash` | direct, audited | auto-allow everything except a deny-list (`rm -rf`, `git push`, `curl|sh`, writes outside cwd, `sudo`) | trusted mechanical tasks |
+| `leash` | direct, audited | auto-allow everything except a deny-list (`rm -rf`, `git push`, `curl|sh`, `sudo`, inline interpreters) | trusted mechanical tasks |
 
 Allow/deny lists live in one policy module in grokd (`policy.mjs`) — data, not scattered conditionals.
+
+**Containment boundary (corrected 2026-07-09, found by live probe).** The fs-mediator contains and audits *grok's file tools* only. Shell commands run with the broker's privileges and can write outside the workspace, so containment is **not** a backstop under `leash` — the permission gate is the only real control, and `leash` disables it. `leash`'s deny-list is a tripwire for accidental escapes, not a sandbox. Untrusted work runs under `gate`. A true sandbox would need OS-level confinement (grok's `--sandbox` flag is unverified over `agent stdio`).
 
 ### 5.2 Worker contract (prompt-level)
 
