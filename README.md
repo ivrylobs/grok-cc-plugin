@@ -32,7 +32,7 @@ Requires: Node ≥ 20, the `grok` CLI (0.2.91+) logged in (`grok login`). The Se
 | `/grok:advise <id>` | Review a worker's pending request; approve, veto (`+ guidance`), or answer |
 | `/grok:result <id>` | Fetch a finished worker's result (verify before accepting) |
 | `/grok:resume <id>` | Re-attach a dead worker with memory intact |
-| `/grok:fork <id>` | Branch a worker's session (needs a grok build that supports it) |
+| `/grok:fork <id>` | Branch a worker's session — *not wired in v0.1.0; returns a clear error, use `spawn --session` to branch manually* |
 | `/grok:kill <id>` | Stop a worker |
 | `/grok:config [--model <id>] [--effort low\|medium\|high]` | Show or set the default worker model / reasoning effort |
 
@@ -100,7 +100,7 @@ npm run test:live # truth pass: real grok-4.5 (needs login), ~45s
 npm run e2e       # full §9 walk via grokctl vs real grok
 ```
 
-The mock (`test/mock-agent.mjs`) speaks the identical ACP wire format, so protocol regressions surface instantly; live runs prove real grok behavior. Verified 2026-07-09 (grok 0.2.91, node 22.22.3): 39 offline + 39 live, 0 failures.
+The mock (`test/mock-agent.mjs`) speaks the identical ACP wire format, so protocol regressions surface instantly; live runs prove real grok behavior. Verified 2026-07-09 (grok 0.2.91, node 22.22.3): 48 offline (1 live-only skip) + 48 live, 0 failures.
 
 ### Runtime: node, not bun
 

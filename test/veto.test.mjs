@@ -32,3 +32,22 @@ test('shell -> inbox -> deny -> not executed -> corrective say -> done', async (
     worker.kill(meta.id)
   }
 })
+
+test('kill during a held permission clears it — no timer left to overwrite killed->blocked', async () => {
+  tmpHome()
+  const ws = tmpWorkspace()
+  const worker = await import('../lib/worker.mjs')
+  const meta = await worker.spawnWorker({
+    task: 'Use ONLY your shell/bash tool to run exactly this command: `mkdir secret_dir`. If denied, do not retry.',
+    cwd: ws,
+    grip: 'advise',
+  })
+  await driveUntil(worker, meta.id, 'advising', { onAdvising: async () => {} })
+  assert.equal(worker.inbox(meta.id).filter(i => i.type === 'permission').length, 1)
+
+  worker.kill(meta.id)
+  assert.equal(worker.status(meta.id).status, 'killed')
+  // the 30m timer lived inside the held permission's resolver; kill must have run it
+  // (which clears the timer), so nothing is left pending to answer or to flip status
+  assert.throws(() => worker.answer(meta.id, { allow: true }), /not live|no pending/)
+})

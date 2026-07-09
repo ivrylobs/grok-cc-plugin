@@ -8,4 +8,5 @@ Fork worker $ARGUMENTS:
 
 1. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/grokctl.mjs" fork $ARGUMENTS`.
 2. Present the returned JSON to the user.
-3. Note: this errors on Grok versions that do not support `_x.ai/session/fork`.
+
+**v0.1.0 limitation:** fork is not yet wired — the `_x.ai/session/fork` params are unmapped, so this command returns a clear error even when the probe reports fork support. To branch manually, spawn a new worker on the same session: `grokctl spawn --session <sessionId> ...`.

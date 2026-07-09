@@ -1,7 +1,8 @@
 {
   "name": "grok-cc",
   "owner": {
-    "name": "ivrylobs"
+    "name": "ivrylobs",
+    "email": "ivrylobs@gmail.com"
   },
   "metadata": {
     "description": "Claude advises, Grok works: veto-gated resumable Grok worker fleet over ACP.",
@@ -15,6 +16,10 @@
       "author": {
         "name": "ivrylobs"
       },
+      "license": "MIT",
+      "homepage": "https://github.com/ivrylobs/grok-cc-plugin",
+      "repository": "https://github.com/ivrylobs/grok-cc-plugin",
+      "keywords": ["grok", "acp", "agent", "delegation", "worker", "code-review"],
       "source": "./"
     }
   ]

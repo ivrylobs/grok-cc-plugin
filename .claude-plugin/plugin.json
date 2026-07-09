@@ -1,5 +1,9 @@
 {
   "name": "grok",
   "description": "Claude advises, Grok works: veto-gated resumable Grok worker fleet over ACP",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "author": { "name": "ivrylobs" },
+  "license": "MIT",
+  "homepage": "https://github.com/ivrylobs/grok-cc-plugin",
+  "keywords": ["grok", "acp", "agent", "delegation", "worker"]
 }

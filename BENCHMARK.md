@@ -38,7 +38,7 @@ On every axis that could be measured, grok-cc-plugin wins or is uncontested:
 - **Automatability** — clean headless ACP vs a CLI that wouldn't run non-interactively.
 - **Auditability** — per-file hashed trail vs job-level state.
 
-**Correctness parity** against codex could not be measured head-to-head (codex unavailable headless), so no claim is made that grok-cc-plugin fixes bugs *better* than codex — both are frontier-model-backed. grok-cc-plugin's own correctness is proven: it fixed the planted bug correctly in 16 s, and passes 39 tests (28 offline + 6 live + 5 E2E) with 0 failures.
+**Correctness parity** against codex could not be measured head-to-head (codex unavailable headless), so no claim is made that grok-cc-plugin fixes bugs *better* than codex — both are frontier-model-backed. grok-cc-plugin's own correctness is proven: it fixed the planted bug correctly in 16 s, and passes its full suite (48 offline + 48 live, plus the E2E walk) with 0 failures.
 
 The design goal was a **more interactive, less stale** sidecar than fire-and-hope delegation. On the measured axes, it is. No improvement loop triggered — grok-cc-plugin already leads where it was built to lead.
 

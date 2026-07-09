@@ -50,15 +50,16 @@ const ops = {
     const ready = () => worker.list()
       .filter(m => watched().includes(m.id) && !['starting', 'running'].includes(m.status))
       .map(m => ({ id: m.id, status: m.status }))
-    const now = ready()
-    if (now.length) return { woke: now }
     return new Promise(resolve => {
-      const timer = setTimeout(() => { worker.events.off('wake', h); resolve({ timeout: true }) }, timeoutSec * 1000)
-      const h = () => {
-        const r = ready()
-        if (r.length) { clearTimeout(timer); worker.events.off('wake', h); resolve({ woke: r }) }
-      }
+      // Subscribe BEFORE the first ready() check: a wake firing in between would
+      // otherwise be lost until the timeout (TOCTOU).
+      let done = false
+      const settle = v => { if (done) return; done = true; clearTimeout(timer); worker.events.off('wake', h); resolve(v) }
+      const h = () => { const r = ready(); if (r.length) settle({ woke: r }) }
+      const timer = setTimeout(() => settle({ timeout: true }), timeoutSec * 1000)
       worker.events.on('wake', h)
+      const now = ready()
+      if (now.length) settle({ woke: now })
     })
   },
   async stop() { setTimeout(() => shutdown(0), 50); return { stopping: true } },

@@ -88,7 +88,7 @@ Responsibilities:
 5. **Wake bridge** — `worker.wait {ids?, timeoutSec}` over the socket blocks until any watched worker gains an inbox item or terminates. `grokctl wait` is a thin caller; Claude runs it as a background Bash task and gets woken by the harness when it exits.
 6. **Lifecycle** — `worker.list/status/result/kill/resume`, `worker.say {id, text}` (new `session/prompt` on the same session — used both for answering NEED_INPUT and for corrective guidance after a deny), `worker.fork {id}` (via `_x.ai/session/fork` when the probe confirmed it; otherwise error with a clear message). Broker exits when idle > 2h with no workers (and on `broker.stop`).
 
-Concurrency: max 4 concurrent worker children by default (configurable via `GROK_CC_MAX_WORKERS`); further spawns queue.
+Concurrency: max 4 concurrent worker children by default (configurable via `GROK_CC_MAX_WORKERS`); a spawn past the cap is rejected with an error (the caller kills or waits, then retries) — v0.1.0 does not queue.
 
 ### 4.2 grokctl (CLI)
 

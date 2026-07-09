@@ -1,12 +1,12 @@
 // E2E: drive grokctl exactly as the /grok:* commands do, against real grok.
 // Walks spec §9 criteria and prints evidence. Run with GROK_CC_LIVE=1.
 import { execFileSync } from 'node:child_process'
-import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const REPO = '/Users/ivrylobs/dev/ivrylobs/grok-cc-plugin'
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CTL = path.join(REPO, 'bin/grokctl.mjs')
 const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'gcc-e2e-'))
 const env = { ...process.env, GROK_CC_HOME: HOME }
