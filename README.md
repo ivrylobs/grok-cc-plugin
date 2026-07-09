@@ -1,7 +1,7 @@
 # grok-cc-plugin
 
 <p align="center">
-  <img src="assets/hero.png" alt="grok-cc — Claude captains. Grok implements. You veto mid-flight." width="820">
+  <img src="https://raw.githubusercontent.com/ivrylobs/grok-cc-plugin/main/assets/hero.png" alt="grok-cc — Claude captains. Grok implements. You veto mid-flight." width="820">
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 ## Proof, not promises
 
 <p align="center">
-  <img src="assets/benchmark.svg" alt="Proof scorecard: warm spawn ~1500x faster (2205ms to 1.4ms), a ~16s autonomous bug fix, a worker that asked for the secret key instead of inventing it, and 48 offline + 48 live tests with 0 failures." width="720">
+  <img src="https://raw.githubusercontent.com/ivrylobs/grok-cc-plugin/main/assets/benchmark.png" alt="Proof scorecard: warm spawn ~1500x faster (2205ms to 1.4ms), a ~16s autonomous bug fix, a worker that asked for the secret key instead of inventing it, and 48 offline + 48 live tests with 0 failures." width="560">
 </p>
 
 Every one of those numbers is reproducible **on your machine** — that's the whole pitch. Verify the engineering with no grok account, or the model behavior with one:
