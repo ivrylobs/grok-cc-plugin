@@ -1,5 +1,7 @@
 ---
 description: Review and answer a Grok worker's pending request
+argument-hint: '<worker-id>'
+allowed-tools: Bash(node:*), Read, AskUserQuestion
 ---
 For worker $ARGUMENTS:
 

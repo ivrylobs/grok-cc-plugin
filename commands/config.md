@@ -1,5 +1,8 @@
 ---
 description: Show or set the default Grok model and reasoning effort for workers
+argument-hint: '[--model <id|none>] [--effort low|medium|high|none]'
+disable-model-invocation: true
+allowed-tools: Bash(node:*)
 ---
 Configure worker model / reasoning effort. $ARGUMENTS may contain `--model <id>` and/or `--effort low|medium|high`.
 

@@ -1,5 +1,8 @@
 ---
 description: Fork a Grok worker session
+argument-hint: '<worker-id>'
+disable-model-invocation: true
+allowed-tools: Bash(node:*)
 ---
 Fork worker $ARGUMENTS:
 

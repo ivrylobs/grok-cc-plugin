@@ -1,5 +1,8 @@
 ---
 description: Kill a Grok worker
+argument-hint: '<worker-id>'
+disable-model-invocation: true
+allowed-tools: Bash(node:*)
 ---
 Kill worker $ARGUMENTS:
 

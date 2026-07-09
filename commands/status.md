@@ -1,5 +1,8 @@
 ---
 description: Show Grok worker status (all, or one by id)
+argument-hint: '[worker-id]'
+disable-model-invocation: true
+allowed-tools: Bash(node:*)
 ---
 Status of workers:
 
