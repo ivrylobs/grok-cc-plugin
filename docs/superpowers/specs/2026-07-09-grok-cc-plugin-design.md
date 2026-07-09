@@ -111,9 +111,11 @@ Thin socket client, one subcommand per broker op: `spawn`, `list`, `status <id>`
 |---|---|---|---|
 | `gate` | staged to `staged/`, applied only on `approve-stage` | every request → inbox | untrusted tasks, production trees |
 | `advise` (default) | direct, audited, workspace-contained | request → inbox unless it matches the allow-list (read-only commands: `ls`, `cat`, `grep`, `git status/diff/log`, test runners `pytest`/`npm test`/`cargo test`) | normal work |
-| `leash` | direct, audited | auto-allow everything except a deny-list (`rm -rf`, `git push`, `curl|sh`, writes outside cwd, `sudo`) | trusted mechanical tasks |
+| `leash` | direct, audited | auto-allow everything except a deny-list (`rm -rf`, `git push`, `curl|sh`, `sudo`, inline interpreters) | trusted mechanical tasks |
 
 Allow/deny lists live in one policy module in grokd (`policy.mjs`) — data, not scattered conditionals.
+
+**Containment boundary (corrected 2026-07-09, found by live probe).** The fs-mediator contains and audits *grok's file tools* only. Shell commands run with the broker's privileges and can write outside the workspace, so containment is **not** a backstop under `leash` — the permission gate is the only real control, and `leash` disables it. `leash`'s deny-list is a tripwire for accidental escapes, not a sandbox. Untrusted work runs under `gate`. A true sandbox would need OS-level confinement (grok's `--sandbox` flag is unverified over `agent stdio`).
 
 ### 5.2 Worker contract (prompt-level)
 

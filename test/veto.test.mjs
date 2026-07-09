@@ -19,6 +19,9 @@ test('shell -> inbox -> deny -> not executed -> corrective say -> done', async (
     await driveUntil(worker, meta.id, 'advising', { onAdvising: async () => {} })
     const perm = worker.inbox(meta.id).find(i => i.type === 'permission')
     assert.match(perm.toolCall.title, /mkdir secret_dir/)
+    // advising while a permission is held: say() must refuse rather than clobber
+    // status and orphan the resolver (grok is blocked on the answer, not on advice)
+    await assert.rejects(worker.say(meta.id, 'some advice'), /pending permission/)
     worker.answer(meta.id, { allow: false, why: 'not allowed to create that directory' })
     assert.ok(!fs.existsSync(path.join(ws, 'secret_dir')))   // the veto held: command never executed
     // corrective guidance; grok may finish DONE or declare itself BLOCKED — both are clean terminal states

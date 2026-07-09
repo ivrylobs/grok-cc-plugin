@@ -46,9 +46,11 @@ Set per worker with `--grip` on spawn (default `advise`):
 |---|---|---|---|
 | `gate` | staged until `approve-stage` | every request → you decide | untrusted tasks, production trees |
 | `advise` *(default)* | direct, audited, contained | read-only shell auto-runs; mutations → you decide | normal work |
-| `leash` | direct, audited | everything auto-runs except a deny-list (`rm -rf`, `git push`, `sudo`, `curl\|sh`) | trusted mechanical tasks |
+| `leash` | direct, audited | everything auto-runs except a deny-list (`rm -rf`, `git push`, `sudo`, `curl\|sh`, inline interpreters) | trusted mechanical tasks |
 
-Containment (writes confined to the worker's cwd) is enforced by the fs-mediator regardless of grip — it's the backstop under every level.
+Containment (writes confined to the worker's cwd, sha256-audited) is enforced by the fs-mediator on **grok's file tools** at every grip level.
+
+**It does not extend to shell.** A shell command runs with the broker's full privileges and can write anywhere. Under `gate` and `advise` the permission gate is what stops it — you see the command and decide. Under `leash` shell auto-runs, so **`leash` is not a sandbox**: its deny-list is a tripwire for accidental escapes (`node -e`, `python -c`, `sh -c`, `eval`), not a boundary against a worker that means to cross it. Run untrusted work under `gate`.
 
 ## Model & reasoning effort
 
