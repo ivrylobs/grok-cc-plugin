@@ -182,6 +182,8 @@ async function main() {
   const skipAuto = cmd === 'broker' && (argv[0] === 'stop' || argv[0] === 'status')
 
   if (cmd === 'warm') { out(await rpc('warm')); return }   // diagnostic: is a client pre-warmed, and for which cwd
+  if (cmd === 'sweep') { out(await rpc('sweep')); return }  // force the watchdog pass now
+  if (cmd === 'prune') { out(await rpc('prune', { days: takeFlag(argv, '--days') })); return }
 
   if (cmd === 'broker') {
     const sub = argv.shift()

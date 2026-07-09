@@ -106,10 +106,32 @@ The mock (`test/mock-agent.mjs`) speaks the identical ACP wire format, so protoc
 
 Measured 2026-07-09 (bun 1.3.11 vs node 22.22.3): bun saves ~5 ms per `grokctl` invocation (33 ms vs 40 ms) and nothing at all on the hot path — the warm pool already took repeat spawn from 2205 ms to 1.4 ms, and everything left is grok's inference. Against that, `bun test` runs all test files in one process where `node --test` forks per file; our tests set `GROK_CC_HOME` before importing `store.mjs`, which reads it at module scope, so a shared module cache breaks isolation (`store.test.mjs` fails under bun). Node stays. Revisit only if bun becomes the deployment target for reasons other than speed.
 
+## Worker lifecycle & cost control
+
+A delegated worker is a real process spending real tokens. Three mechanisms keep the fleet honest, so `status` never lies and no job runs forever:
+
+| Mechanism | When | What it does |
+|---|---|---|
+| **reconcile** | every broker start | Nothing is live yet, so any worker still claiming `starting`/`running`/`advising`/`paused`/`need_input` is a corpse from the last broker. Rewritten to `dead` (with `staleFrom`), and resumable — `grokctl resume <id>` re-attaches via `session/load` with memory intact. |
+| **sweep** (watchdog) | every 30 s, or `grokctl sweep` | Kills any worker whose turn exceeds a wall-clock cap, or whose agent has gone silent. Status becomes `timeout`, with the reason in the inbox. |
+| **prune** | every broker start, or `grokctl prune [--days N]` | Deletes terminal worker dirs older than the retention window. Never touches an active or live worker. |
+
+The watchdog only reaps `starting`/`running` — the states that burn tokens unattended. `advising`, `paused` and `need_input` are *resting on you*, not spending, and are never swept (a held permission has its own 30-minute timeout). Concurrency is separately capped by `GROK_CC_MAX_WORKERS` (default 4).
+
+| Env | Default | Meaning |
+|---|---|---|
+| `GROK_CC_IDLE_MS` | 5 min | no agent activity → kill |
+| `GROK_CC_MAX_TURN_MS` | 30 min | hard wall-clock cap per turn → kill |
+| `GROK_CC_SWEEP_MS` | 30 s | how often the watchdog runs |
+| `GROK_CC_RETAIN_DAYS` | 7 | prune terminal workers older than this |
+| `GROK_CC_MAX_WORKERS` | 4 | concurrent `starting`/`running` workers |
+
 ## Troubleshooting
 
 - **"broker not running"** → `node bin/grokctl.mjs broker start` (or just run any command; it auto-starts). Note the broker is `broker stop`, not `stop` — a bare `stop` is an unknown command and exits non-zero, leaving a stale broker serving old code.
 - **Spawn feels slow when it should be warm** → `node bin/grokctl.mjs warm` shows whether a client is pre-warmed and for which cwd. A `null`, or a different cwd, means the next spawn pays the full ~2 s handshake.
 - **Worker stuck `advising`** → `/grok:advise <id>`; an unanswered permission denies after 30 min.
+- **Worker shows `timeout`** → the watchdog killed it (reason in `grokctl inbox <id>`). `grokctl resume <id>` picks it back up.
+- **Worker shows `dead` with `staleFrom`** → its broker died under it. Resumable; nothing was lost.
 - **grok upgraded** → capability probes adapt at handshake; unsupported extensions error clearly instead of crashing.
 - **MCP 403 noise in logs** → workers suppress your MCP servers (`mcpServers: []`); harmless.

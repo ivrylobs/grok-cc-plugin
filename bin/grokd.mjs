@@ -8,6 +8,7 @@ import { applyStage } from '../lib/fs-mediator.mjs'
 const SOCK = store.sockPath()
 const MAX_WORKERS = Number(process.env.GROK_CC_MAX_WORKERS || 4)
 const IDLE_EXIT_MS = 2 * 60 * 60 * 1000
+const SWEEP_MS = Number(process.env.GROK_CC_SWEEP_MS || 30 * 1000)
 let lastActivity = Date.now()
 
 const ACTIVE = () => worker.list().filter(m => ['starting', 'running', 'advising', 'paused', 'need_input'].includes(m.status))
@@ -22,6 +23,8 @@ function shutdown(code = 0) {
 const ops = {
   async ping() { return { pid: process.pid } },
   async warm() { return worker.warmInfo() ?? { warm: null } },
+  async sweep() { return { killed: worker.sweep() } },
+  async prune({ days }) { return { removed: worker.prune(days == null ? {} : { days: Number(days) }) } },
   async spawn(args) {
     if (ACTIVE().filter(m => ['starting', 'running'].includes(m.status)).length >= MAX_WORKERS) {
       throw new Error(`worker limit ${MAX_WORKERS} reached; kill or wait first`)
@@ -87,6 +90,10 @@ function serve() {
   fs.mkdirSync(store.ROOT, { recursive: true })   // state dir may not exist yet on first real run
   server.listen(SOCK, () => {
     fs.writeFileSync(SOCK + '.pid', String(process.pid))
+    // Nothing is live yet, so anything claiming to run is a corpse from the last broker.
+    worker.reconcile()
+    worker.prune()
+    setInterval(() => worker.sweep(), SWEEP_MS).unref()
     setInterval(() => {
       if (!ACTIVE().length && Date.now() - lastActivity > IDLE_EXIT_MS) shutdown(0)
     }, 10 * 60 * 1000).unref()

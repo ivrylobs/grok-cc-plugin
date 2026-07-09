@@ -28,6 +28,8 @@ async function handlePrompt(id, { sessionId, prompt }) {
   const s = load(sessionId)
   const text = prompt.map(p => p.text ?? '').join('\n')
 
+  // never answers: lets the watchdog tests observe a genuinely stuck turn
+  if (/hang forever/i.test(text)) return
   // corrective after a deny
   if (/do not run that command/i.test(text)) {
     chunk(sessionId, 'DENIED-OK\nRESULT:\n```json\n{"summary":"denied-ok","files_changed":[],"verification":"none"}\n```\nSTATUS: DONE')
