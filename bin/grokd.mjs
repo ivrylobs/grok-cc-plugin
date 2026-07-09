@@ -76,6 +76,7 @@ function serve() {
     })
     sock.on('error', () => {})
   })
+  fs.mkdirSync(store.ROOT, { recursive: true })   // state dir may not exist yet on first real run
   server.listen(SOCK, () => {
     fs.writeFileSync(SOCK + '.pid', String(process.pid))
     setInterval(() => {
