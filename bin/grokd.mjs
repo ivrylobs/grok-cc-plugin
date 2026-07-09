@@ -14,12 +14,14 @@ const ACTIVE = () => worker.list().filter(m => ['starting', 'running', 'advising
 
 function shutdown(code = 0) {
   // Warm slot is broker-owned and never registered as a worker — must reap explicitly.
+  // Live workers' children need no kill: they exit on stdin EOF when we do.
   worker.killWarm()
   process.exit(code)
 }
 
 const ops = {
   async ping() { return { pid: process.pid } },
+  async warm() { return worker.warmInfo() ?? { warm: null } },
   async spawn(args) {
     if (ACTIVE().filter(m => ['starting', 'running'].includes(m.status)).length >= MAX_WORKERS) {
       throw new Error(`worker limit ${MAX_WORKERS} reached; kill or wait first`)

@@ -181,6 +181,8 @@ async function main() {
 
   const skipAuto = cmd === 'broker' && (argv[0] === 'stop' || argv[0] === 'status')
 
+  if (cmd === 'warm') { out(await rpc('warm')); return }   // diagnostic: is a client pre-warmed, and for which cwd
+
   if (cmd === 'broker') {
     const sub = argv.shift()
     if (sub === 'start') {

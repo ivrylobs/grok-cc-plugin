@@ -108,7 +108,8 @@ Measured 2026-07-09 (bun 1.3.11 vs node 22.22.3): bun saves ~5 ms per `grokctl` 
 
 ## Troubleshooting
 
-- **"broker not running"** → `node bin/grokctl.mjs broker start` (or just run any command; it auto-starts).
+- **"broker not running"** → `node bin/grokctl.mjs broker start` (or just run any command; it auto-starts). Note the broker is `broker stop`, not `stop` — a bare `stop` is an unknown command and exits non-zero, leaving a stale broker serving old code.
+- **Spawn feels slow when it should be warm** → `node bin/grokctl.mjs warm` shows whether a client is pre-warmed and for which cwd. A `null`, or a different cwd, means the next spawn pays the full ~2 s handshake.
 - **Worker stuck `advising`** → `/grok:advise <id>`; an unanswered permission denies after 30 min.
 - **grok upgraded** → capability probes adapt at handshake; unsupported extensions error clearly instead of crashing.
 - **MCP 403 noise in logs** → workers suppress your MCP servers (`mcpServers: []`); harmless.
