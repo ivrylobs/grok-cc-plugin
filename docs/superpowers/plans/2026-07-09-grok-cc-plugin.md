@@ -1,6 +1,6 @@
 # grok-cc-plugin Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build the "Advisor & Fleet" plugin from `docs/superpowers/specs/2026-07-09-grok-cc-plugin-design.md`: a broker (`grokd`) + CLI (`grokctl`) that let Claude Code drive veto-gated, resumable Grok workers over ACP, plus the Claude-side commands/skills/hooks.
 
@@ -65,7 +65,7 @@ test/helpers.mjs
   - `readMeta(id): object|null` — null if absent
   - `listMetas(): object[]` — every `workers/*/meta.json`, unparsable/missing skipped
 
-- [ ] **Step 1 (Captain): scaffold repo files**
+- [x] **Step 1 (Captain): scaffold repo files**
 
 `package.json`:
 ```json
@@ -96,7 +96,7 @@ node_modules/
 *.log
 ```
 
-- [ ] **Step 2 (Captain): write failing tests**
+- [x] **Step 2 (Captain): write failing tests**
 
 `test/store.test.mjs`:
 ```js
@@ -153,11 +153,11 @@ test('listMetas returns all metas', () => {
 })
 ```
 
-- [ ] **Step 3: run tests, verify FAIL**
+- [x] **Step 3: run tests, verify FAIL**
 
 Run: `node --test test/store.test.mjs` — Expected: FAIL, `Cannot find module '../lib/store.mjs'`.
 
-- [ ] **Step 4 (Captain→Sailor): delegate implementation**
+- [x] **Step 4 (Captain→Sailor): delegate implementation**
 
 ```bash
 grok -p "You are implementing one module of grok-cc-plugin (repo = current dir).
@@ -170,11 +170,11 @@ FAIL with output." \
   --cwd "$(pwd)" --always-approve --check
 ```
 
-- [ ] **Step 5 (Captain): review + verify**
+- [x] **Step 5 (Captain): review + verify**
 
 Review `git diff -- lib/store.mjs` against: stdlib only; no test edits (`git diff --stat test/` empty); no extra exports. Run: `npm test` — Expected: store tests PASS.
 
-- [ ] **Step 6: commit**
+- [x] **Step 6: commit**
 
 ```bash
 git add -A && git commit -m "feat: scaffold plugin + store module (sailor: grok)"
@@ -191,7 +191,7 @@ git add -A && git commit -m "feat: scaffold plugin + store module (sailor: grok)
 - Produces: `parseStatus(text: string) -> {status, question, result, raw}` where `status ∈ 'WORKING'|'NEED_INPUT'|'DONE'|'BLOCKED'`, `question: string|null`, `result: object|null`, `raw = text`.
 - Rules (spec §5.2 + §6 drift): status = **last** `STATUS: X` line; `QUESTION:` captures text after marker up to the STATUS line; `RESULT:` = last ```` ```json ```` fenced block, parsed; missing STATUS **or** malformed result JSON on DONE → `{status:'DONE', result:{summary: text}}`.
 
-- [ ] **Step 1 (Captain): failing tests**
+- [x] **Step 1 (Captain): failing tests**
 
 `test/contract.test.mjs`:
 ```js
@@ -237,9 +237,9 @@ test('malformed RESULT json on DONE degrades to raw summary', () => {
 })
 ```
 
-- [ ] **Step 2: verify FAIL** — `node --test test/contract.test.mjs` → `Cannot find module`.
+- [x] **Step 2: verify FAIL** — `node --test test/contract.test.mjs` → `Cannot find module`.
 
-- [ ] **Step 3 (Sailor): delegate**
+- [x] **Step 3 (Sailor): delegate**
 
 ```bash
 grok -p "Implement lib/contract.mjs in this repo (ESM, stdlib only): export
@@ -250,8 +250,8 @@ report PASS/FAIL with output." \
   --cwd "$(pwd)" --always-approve --check
 ```
 
-- [ ] **Step 4 (Captain): review** — diff review (no test edits, one export); `npm test` PASS.
-- [ ] **Step 5: commit** — `git add -A && git commit -m "feat: worker contract parser (sailor: grok)"`
+- [x] **Step 4 (Captain): review** — diff review (no test edits, one export); `npm test` PASS.
+- [x] **Step 5: commit** — `git add -A && git commit -m "feat: worker contract parser (sailor: grok)"`
 
 ---
 
@@ -267,7 +267,7 @@ report PASS/FAIL with output." \
   - `advise`: `'allow'` iff `kind==='execute'` and command matches `ADVISE_ALLOW` (read-only: `ls`, `cat`, `grep`, `rg`, `git status|diff|log`, `pytest`, `npm test`, `cargo test`, `node --test`); everything else `'ask'`.
   - `leash`: `'ask'` iff command matches `LEASH_DENY` (`rm -rf`, `git push`, `sudo`, `curl ... | sh` piping); everything else (any kind) `'allow'`.
 
-- [ ] **Step 1 (Captain): failing tests**
+- [x] **Step 1 (Captain): failing tests**
 
 `test/policy.test.mjs`:
 ```js
@@ -305,9 +305,9 @@ test('unknown grip is treated as gate', () => {
 })
 ```
 
-- [ ] **Step 2: verify FAIL** — `node --test test/policy.test.mjs`.
+- [x] **Step 2: verify FAIL** — `node --test test/policy.test.mjs`.
 
-- [ ] **Step 3 (Sailor): delegate**
+- [x] **Step 3 (Sailor): delegate**
 
 ```bash
 grok -p "Implement lib/policy.mjs in this repo (ESM, stdlib only) to satisfy
@@ -319,8 +319,8 @@ PASS/FAIL with output." \
   --cwd "$(pwd)" --always-approve --check
 ```
 
-- [ ] **Step 4 (Captain): review** — check regexes aren't overly broad (e.g. `rm -rf` anchored as a word, not matching `firm -rfx`); `npm test` PASS.
-- [ ] **Step 5: commit** — `git commit -am "feat: grip policy engine (sailor: grok)"`
+- [x] **Step 4 (Captain): review** — check regexes aren't overly broad (e.g. `rm -rf` anchored as a word, not matching `firm -rfx`); `npm test` PASS.
+- [x] **Step 5: commit** — `git commit -am "feat: grip policy engine (sailor: grok)"`
 
 ---
 
@@ -336,7 +336,7 @@ PASS/FAIL with output." \
   - `makeFsHandlers(meta): {readTextFile({path}) -> {content}, writeTextFile({path, content}) -> {}}` — meta `{id, cwd, grip}`. Every call appends to `<workerDir>/fs-audit.jsonl`: `{ts, op:'read'|'write'|'denied', path, bytes, sha256}` (sha256 of content via `node:crypto`, write/read only). Denied ops log `op:'denied'` then rethrow. Under `grip==='gate'`, writes divert to `<workerDir>/staged/<relative-path>`.
   - `applyStage(id, paths=null): string[]` — copy staged files to their real locations (all, or the given relative paths); returns applied relative paths.
 
-- [ ] **Step 1 (Captain): failing tests**
+- [x] **Step 1 (Captain): failing tests**
 
 `test/fs-mediator.test.mjs`:
 ```js
@@ -393,9 +393,9 @@ test('gate grip: writes stage, applyStage applies', async () => {
 })
 ```
 
-- [ ] **Step 2: verify FAIL** — `node --test test/fs-mediator.test.mjs`.
+- [x] **Step 2: verify FAIL** — `node --test test/fs-mediator.test.mjs`.
 
-- [ ] **Step 3 (Sailor): delegate**
+- [x] **Step 3 (Sailor): delegate**
 
 ```bash
 grok -p "Implement lib/fs-mediator.mjs in this repo (ESM, stdlib only:
@@ -409,8 +409,8 @@ Run \`node --test test/fs-mediator.test.mjs\`, report PASS/FAIL with output." \
   --cwd "$(pwd)" --always-approve --check
 ```
 
-- [ ] **Step 4 (Captain): review hard** — this is a security module. Checklist: realpath on nearest existing ancestor (walk up until `existsSync`); denial logged before throw; staged paths derived from the contained relative path (no re-derivation from raw input); `npm test` PASS.
-- [ ] **Step 5: commit** — `git commit -am "feat: fs mediation with containment, audit, staging (sailor: grok)"`
+- [x] **Step 4 (Captain): review hard** — this is a security module. Checklist: realpath on nearest existing ancestor (walk up until `existsSync`); denial logged before throw; staged paths derived from the contained relative path (no re-derivation from raw input); `npm test` PASS.
+- [x] **Step 5: commit** — `git commit -am "feat: fs mediation with containment, audit, staging (sailor: grok)"`
 
 ---
 
@@ -424,7 +424,7 @@ Run \`node --test test/fs-mediator.test.mjs\`, report PASS/FAIL with output." \
   - `GROK_BIN: string` (env `GROK_CC_GROK_BIN` fallback `~/.grok/bin/grok`)
   - `class AcpClient` — `constructor({cwd, onUpdate, onAgentRequest})`; `request(method, params, timeoutMs=15000)` (0 = no timeout); `handshake() -> initialize result`; `probeExtensions(sessionId) -> {method: bool}`; `kill()`; `closed: Promise<exitCode>`. `onAgentRequest(method, params)` may return a promise held open arbitrarily long (permission holds); throwing `{code, message}` sends a JSON-RPC error reply.
 
-- [ ] **Step 1: write helpers + failing live test**
+- [x] **Step 1: write helpers + failing live test**
 
 `test/helpers.mjs`:
 ```js
@@ -464,9 +464,9 @@ test('handshake + capability probe classify extensions', { skip: !LIVE && 'set G
 })
 ```
 
-- [ ] **Step 2: verify FAIL** — `GROK_CC_LIVE=1 node --test test/handshake.test.mjs` → `Cannot find module '../lib/acp-client.mjs'`. Also `node --test test/handshake.test.mjs` → SKIP (offline gate works).
+- [x] **Step 2: verify FAIL** — `GROK_CC_LIVE=1 node --test test/handshake.test.mjs` → `Cannot find module '../lib/acp-client.mjs'`. Also `node --test test/handshake.test.mjs` → SKIP (offline gate works).
 
-- [ ] **Step 3: implement**
+- [x] **Step 3: implement**
 
 `lib/acp-client.mjs`:
 ```js
@@ -556,8 +556,8 @@ export class AcpClient {
 }
 ```
 
-- [ ] **Step 4: verify PASS** — `GROK_CC_LIVE=1 node --test test/handshake.test.mjs` PASS; `npm test` all green (live skipped offline).
-- [ ] **Step 5: commit** — `git commit -am "feat: ACP client with handshake and capability probe"`
+- [x] **Step 4: verify PASS** — `GROK_CC_LIVE=1 node --test test/handshake.test.mjs` PASS; `npm test` all green (live skipped offline).
+- [x] **Step 5: commit** — `git commit -am "feat: ACP client with handshake and capability probe"`
 
 ---
 
@@ -579,7 +579,7 @@ export class AcpClient {
   - `kill(id) -> meta`
   - Inbox item shapes: `{ts, type:'permission', key, toolCall, options}` | `{ts, type:'need_input', question}` | `{ts, type:'checkpoint', summary}` | `{ts, type:'done', result}` | `{ts, type:'blocked', reason}` | `{ts, type:'error', error}`
 
-- [ ] **Step 1: failing live tests**
+- [x] **Step 1: failing live tests**
 
 `test/roundtrip.test.mjs`:
 ```js
@@ -649,9 +649,9 @@ test('shell -> inbox -> deny -> not executed -> corrective say -> done', { skip:
 })
 ```
 
-- [ ] **Step 2: verify FAIL** — `GROK_CC_LIVE=1 node --test test/roundtrip.test.mjs` → `Cannot find module '../lib/worker.mjs'`.
+- [x] **Step 2: verify FAIL** — `GROK_CC_LIVE=1 node --test test/roundtrip.test.mjs` → `Cannot find module '../lib/worker.mjs'`.
 
-- [ ] **Step 3: implement**
+- [x] **Step 3: implement**
 
 `lib/worker.mjs`:
 ```js
@@ -849,8 +849,8 @@ export function result(id) {
 }
 ```
 
-- [ ] **Step 4: verify PASS** — `GROK_CC_LIVE=1 node --test test/roundtrip.test.mjs test/veto.test.mjs` → both PASS (~2–4 min). `npm test` offline still green.
-- [ ] **Step 5: commit** — `git commit -am "feat: worker lifecycle with permission hold and contract wiring"`
+- [x] **Step 4: verify PASS** — `GROK_CC_LIVE=1 node --test test/roundtrip.test.mjs test/veto.test.mjs` → both PASS (~2–4 min). `npm test` offline still green.
+- [x] **Step 5: commit** — `git commit -am "feat: worker lifecycle with permission hold and contract wiring"`
 
 ---
 
@@ -865,7 +865,7 @@ export function result(id) {
   - `fork {id}` → calls `_x.ai/session/fork` only if that worker's probes said supported, else error `fork not supported by this grok version`.
   - Single instance: if the socket is already live (ping succeeds) exit 0 with `already running`; stale socket file is unlinked.
 
-- [ ] **Step 1: failing live test**
+- [x] **Step 1: failing live test**
 
 `test/resume.test.mjs` (drives worker module directly for the kill/resume cycle — broker resume op reuses the same functions; socket round-trip is covered by Task 8's wait test):
 ```js
@@ -896,9 +896,9 @@ test('kill child mid-session, resume restores memory', { skip: !LIVE && 'set GRO
 })
 ```
 
-- [ ] **Step 2: verify behavior gap** — `GROK_CC_LIVE=1 node --test test/resume.test.mjs`. Expected: PASS already if Task 6's `say`-auto-resume works; if it fails, fix `resume()` until green (this test pins the spec's §6 resume requirement).
+- [x] **Step 2: verify behavior gap** — `GROK_CC_LIVE=1 node --test test/resume.test.mjs`. Expected: PASS already if Task 6's `say`-auto-resume works; if it fails, fix `resume()` until green (this test pins the spec's §6 resume requirement).
 
-- [ ] **Step 3: implement broker**
+- [x] **Step 3: implement broker**
 
 `bin/grokd.mjs`:
 ```js
@@ -994,7 +994,7 @@ probe.on('connect', () => { console.log('already running'); process.exit(0) })
 probe.on('error', () => { try { fs.unlinkSync(SOCK) } catch {} ; serve() })
 ```
 
-- [ ] **Step 4: smoke test by hand**
+- [x] **Step 4: smoke test by hand**
 
 ```bash
 GROK_CC_HOME=$(mktemp -d) node bin/grokd.mjs &
@@ -1003,7 +1003,7 @@ printf '{"id":1,"op":"ping"}\n' | nc -U "$GROK_CC_HOME/broker.sock"
 ```
 Expected: `{"id":1,"ok":true,"data":{"pid":<n>}}`. Second `node bin/grokd.mjs` prints `already running`, exits 0. Then `printf '{"id":2,"op":"stop"}\n' | nc -U ...` stops it.
 
-- [ ] **Step 5: commit** — `git commit -am "feat: grokd broker with socket ops, wait, idle reaper"`
+- [x] **Step 5: commit** — `git commit -am "feat: grokd broker with socket ops, wait, idle reaper"`
 
 ---
 
@@ -1023,7 +1023,7 @@ Expected: `{"id":1,"ok":true,"data":{"pid":<n>}}`. Second `node bin/grokd.mjs` p
   - Exit codes: 0 success, 1 error (JSON `{error}` on stdout), 2 wait-timeout.
   - Auto-start: any op (except `broker stop|status`) that finds no live socket spawns `bin/grokd.mjs` detached (`stdio:'ignore'`, `unref()`), polls the socket up to 3 s, then proceeds.
 
-- [ ] **Step 1 (Captain): failing live test**
+- [x] **Step 1 (Captain): failing live test**
 
 `test/wait.test.mjs`:
 ```js
@@ -1065,9 +1065,9 @@ test('wait exits 2 on timeout with no workers', { skip: !LIVE && 'set GROK_CC_LI
 })
 ```
 
-- [ ] **Step 2: verify FAIL** — `GROK_CC_LIVE=1 node --test test/wait.test.mjs` → cannot find `bin/grokctl.mjs`.
+- [x] **Step 2: verify FAIL** — `GROK_CC_LIVE=1 node --test test/wait.test.mjs` → cannot find `bin/grokctl.mjs`.
 
-- [ ] **Step 3 (Sailor): delegate**
+- [x] **Step 3 (Sailor): delegate**
 
 ```bash
 grok -p "Implement bin/grokctl.mjs in this repo: a unix-socket JSONL client CLI
@@ -1086,8 +1086,8 @@ test/wait.test.mjs and report PASS/FAIL with output." \
   --cwd "$(pwd)" --always-approve --check
 ```
 
-- [ ] **Step 4 (Captain): review** — auto-start race (poll loop, not fixed sleep); wait timeout maps broker `{timeout:true}` → exit 2; `GROK_CC_LIVE=1 node --test test/wait.test.mjs` PASS; `npm test` green.
-- [ ] **Step 5: commit** — `git commit -am "feat: grokctl CLI with broker auto-start (sailor: grok)"`
+- [x] **Step 4 (Captain): review** — auto-start race (poll loop, not fixed sleep); wait timeout maps broker `{timeout:true}` → exit 2; `GROK_CC_LIVE=1 node --test test/wait.test.mjs` PASS; `npm test` green.
+- [x] **Step 5: commit** — `git commit -am "feat: grokctl CLI with broker auto-start (sailor: grok)"`
 
 ---
 
@@ -1100,7 +1100,7 @@ test/wait.test.mjs and report PASS/FAIL with output." \
 - Consumes: the grokctl CLI surface exactly as produced by Task 8.
 - Produces: `/grok:work`, `/grok:status`, `/grok:advise`, `/grok:result`, `/grok:fork`, `/grok:resume`, `/grok:kill` commands; two skills; a forwarder agent; SessionStart hook.
 
-- [ ] **Step 1 (Captain): write hooks.json + work.md + advise.md** (the load-bearing three)
+- [x] **Step 1 (Captain): write hooks.json + work.md + advise.md** (the load-bearing three)
 
 `hooks/hooks.json`:
 ```json
@@ -1145,7 +1145,7 @@ For worker $ARGUMENTS:
 6. Re-arm `... wait <id> --timeout 570` as a background task unless the worker is done/killed.
 ```
 
-- [ ] **Step 2 (Sailor): delegate the remaining five commands + agent**
+- [x] **Step 2 (Sailor): delegate the remaining five commands + agent**
 
 ```bash
 grok -p "In this repo create five Claude Code command files and one agent file,
@@ -1164,7 +1164,7 @@ Do not invent CLI flags that do not exist. STATUS: DONE with a files list." \
   --cwd "$(pwd)" --always-approve
 ```
 
-- [ ] **Step 3 (Captain): write the two skills** (these encode our hard-won delegation lessons — Captain writes, using real observations from Tasks 1–8 sailor runs)
+- [x] **Step 3 (Captain): write the two skills** (these encode our hard-won delegation lessons — Captain writes, using real observations from Tasks 1–8 sailor runs)
 
 `skills/delegation-contract/SKILL.md`:
 ```markdown
@@ -1199,7 +1199,7 @@ description: How to run the advisor loop for Grok workers - wakes, inbox drainin
 - If a worker dies (status dead), `grokctl resume <id>` restores it with memory intact - do not respawn from scratch.
 ```
 
-- [ ] **Step 4 (Captain): review sailor files** — no invented flags (cross-check each against grokctl); frontmatter valid; commit.
+- [x] **Step 4 (Captain): review sailor files** — no invented flags (cross-check each against grokctl); frontmatter valid; commit.
 
 ```bash
 git add -A && git commit -m "feat: Claude Code surface - commands, skills, agent, hook"
@@ -1213,14 +1213,14 @@ git add -A && git commit -m "feat: Claude Code surface - commands, skills, agent
 - Create: `README.md`
 - Verify: spec §9 criteria against the real plugin
 
-- [ ] **Step 1: install plugin locally and dogfood**
+- [x] **Step 1: install plugin locally and dogfood**
 
 ```bash
 claude plugin install "$(pwd)"   # or add to marketplace config if install-by-path is unavailable
 ```
 Open a fresh Claude session in a scratch repo, run `/grok:work create a Makefile with test and lint targets for this node project`.
 
-- [ ] **Step 2: walk spec §9 checklist, record evidence**
+- [x] **Step 2: walk spec §9 checklist, record evidence**
 
 1. Zero manual polling — the wait background task woke the session for every event (transcript shows task-notifications, no polling loops).
 2. Veto — during the E2E run, deny one shell request via `/grok:advise`; confirm the command never executed (`fs-audit.jsonl` + filesystem).
@@ -1230,9 +1230,9 @@ Open a fresh Claude session in a scratch repo, run `/grok:work create a Makefile
 
 Any criterion failing = fix before README.
 
-- [ ] **Step 3: write README.md** — what it is (one paragraph), install, the seven commands, grip table (copy from spec §5.1), architecture diagram (copy from spec §4), troubleshooting (broker not running → `grokctl broker start`; grok upgrade → capability probes auto-adapt; live tests need `GROK_CC_LIVE=1`).
+- [x] **Step 3: write README.md** — what it is (one paragraph), install, the seven commands, grip table (copy from spec §5.1), architecture diagram (copy from spec §4), troubleshooting (broker not running → `grokctl broker start`; grok upgrade → capability probes auto-adapt; live tests need `GROK_CC_LIVE=1`).
 
-- [ ] **Step 4: final commit + tag**
+- [x] **Step 4: final commit + tag**
 
 ```bash
 git add -A && git commit -m "docs: README + E2E success criteria evidence"
@@ -1253,7 +1253,7 @@ git tag v0.1.0
 
 After Task 10 E2E passes:
 
-- [ ] **Step 1:** Run the same 3 tasks (planted bugfix, YAGNI refactor, cross-repo trace — reuse the duel seeds) through `/grok:work` and through the codex plugin's rescue path. Record: correctness, wall-clock, orchestrator tokens.
-- [ ] **Step 2:** Capability matrix, measured not claimed: mid-task veto, worker-asks-back (NEED_INPUT), push wake (zero polls), resume-after-death, per-file audit. Codex plugin scored on the same axes.
-- [ ] **Step 3:** Verdict: grok-cc-plugin must win on interactivity + staleness with correctness parity. If not → /loop improvement iterations until it does.
-- [ ] **Step 4:** Write benchmark results into README (honest numbers, including losses).
+- [x] **Step 1:** Run the same 3 tasks (planted bugfix, YAGNI refactor, cross-repo trace — reuse the duel seeds) through `/grok:work` and through the codex plugin's rescue path. Record: correctness, wall-clock, orchestrator tokens.
+- [x] **Step 2:** Capability matrix, measured not claimed: mid-task veto, worker-asks-back (NEED_INPUT), push wake (zero polls), resume-after-death, per-file audit. Codex plugin scored on the same axes.
+- [x] **Step 3:** Verdict: grok-cc-plugin must win on interactivity + staleness with correctness parity. If not → /loop improvement iterations until it does.
+- [x] **Step 4:** Write benchmark results into README (honest numbers, including losses).
