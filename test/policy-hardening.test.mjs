@@ -147,8 +147,8 @@ test('advise allows wc as head (0002)', () => {
   assert.equal(decide('wc -l f'), 'allow', 'wc -l f must allow')
 })
 
-test('advise allows sed -n as head (0002)', () => {
-  assert.equal(decide('sed -n 1,10p f'), 'allow', 'sed -n 1,10p f must allow')
+test('advise asks on sed even with -n (admits -i / e — audit)', () => {
+  assert.equal(decide('sed -n 1,10p f'), 'ask', 'sed dropped from heads; -n still admits -i/e')
 })
 
 test('advise allows test as head (0002)', () => {
@@ -157,4 +157,44 @@ test('advise allows test as head (0002)', () => {
 
 test('advise allows find with read-ish predicates (0002)', () => {
   assert.equal(decide('find . -name x'), 'allow', 'find . -name x must allow')
+})
+
+// ─── Adversarial audit findings (fresh Grok pass on the v1 fix) ─────────────
+
+test('advise asks on sed -i in-place write (audit)', () => {
+  assert.equal(decide('sed -n -i s/a/b/ f'), 'ask', 'sed -n -i writes in place')
+})
+
+test("advise asks on sed's exec flag (audit)", () => {
+  assert.equal(decide('sed -n s/.*/id/e f'), 'ask', 'sed s///e executes shell')
+})
+
+test('advise asks on sort -o write via filter position (audit)', () => {
+  assert.equal(decide('cat a | sort -o /tmp/pwned'), 'ask', 'sort -o writes a file')
+})
+
+test('advise asks on uniq OUTPUT write via filter position (audit)', () => {
+  assert.equal(decide('cat a | uniq /dev/null /tmp/pwned'), 'ask', 'uniq positional output writes a file')
+})
+
+test('advise asks on quote-evaded find -delete (audit)', () => {
+  assert.equal(decide('find . -"delete"'), 'ask', 'quotes must not hide -delete')
+})
+
+test('advise asks on backslash-evaded find -delete (audit)', () => {
+  assert.equal(decide('find . -delet\\e'), 'ask', 'backslash must not hide -delete')
+})
+
+test('advise asks on quote-evaded rg --pre (audit)', () => {
+  assert.equal(decide('rg --pre"" sh x .'), 'ask', 'quotes must not hide --pre')
+})
+
+test('advise asks on quote-evaded git --output (audit)', () => {
+  assert.equal(decide('git log --output""=/tmp/x'), 'ask', 'quotes must not hide --output')
+})
+
+// Legitimate quoted reads must survive the quote-strip normalization.
+test('advise still allows a quoted multi-word search pattern (audit)', () => {
+  assert.equal(decide('rg "async fn" .'), 'allow', 'quoted read pattern must allow')
+  assert.equal(decide('grep "TODO" f'), 'allow', 'quoted grep pattern must allow')
 })
