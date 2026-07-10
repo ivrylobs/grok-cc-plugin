@@ -225,3 +225,39 @@ test('advise asks on quoted commands but allows unquoted reads + globs (audit 2)
   assert.equal(decide('rg async src/'), 'allow', 'unquoted single-word search still allows')
   assert.equal(decide('cat *.js'), 'allow', 'glob still allows — expands to filenames, not commands')
 })
+
+// ─── Third audit: whitelist model (bulletproof — unknown flags ask) ─────────
+// Feature-rich tools (rg/git/find) self-exec via their own flags/config, and the
+// dangerous-flag set is open-ended. So auto-allow flips to a whitelist: only
+// recognized read-only options pass; anything unknown asks.
+
+test('advise asks on rg --hostname-bin exec flag (audit 3)', () => {
+  assert.equal(decide('rg --hostname-bin /tmp/x foo'), 'ask', 'rg --hostname-bin runs a program')
+})
+
+test('advise asks on any unknown rg flag (whitelist, audit 3)', () => {
+  assert.equal(decide('rg --frobnicate foo'), 'ask', 'unrecognized rg flag must ask')
+})
+
+test('advise asks on git --ext-diff / --textconv (audit 3)', () => {
+  assert.equal(decide('git log -p --ext-diff'), 'ask', 'ext-diff runs a configured command')
+  assert.equal(decide('git diff --textconv'), 'ask', 'textconv runs a configured command')
+})
+
+test('advise asks on unknown find predicate (whitelist, audit 3)', () => {
+  assert.equal(decide('find . -frobnicate'), 'ask', 'unrecognized find predicate must ask')
+})
+
+test('advise still auto-allows common review commands (audit 3)', () => {
+  for (const c of [
+    'grep -rniE foo src/',        // grep is fully safe with any flags
+    'git log --oneline --graph --stat -p',
+    'git log -3',                 // count shorthand
+    'git diff --stat -w',
+    'rg -n -i foo src/',
+    'rg -niw foo .',              // combined shorts
+    'rg -A3 foo .',               // attached numeric
+    'find . -name x -type f -maxdepth 2',
+    'rg -n foo src/ | head -5',
+  ]) assert.equal(decide(c), 'allow', c)
+})
