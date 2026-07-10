@@ -112,16 +112,77 @@ export function fmtLocal(iso) {
     + `${pad(d.getHours())}:${pad(d.getMinutes())} ${sign}${oh}${om}`
 }
 
-function renderTable(metas) {
-  if (!Array.isArray(metas) || metas.length === 0) return '(no workers)'
-  const head = ['ID', 'STATUS', 'GRIP', 'MODEL', 'UPDATED (local)']
-  const rows = metas.map(m => [
-    m.id ?? '—', m.status ?? '—', m.grip ?? '—', m.model ?? '—',
-    fmtLocal(m.updatedAt ?? m.createdAt),
-  ])
-  const w = head.map((h, i) => Math.max(h.length, ...rows.map(r => String(r[i]).length)))
-  const line = cols => cols.map((c, i) => String(c).padEnd(w[i])).join('  ')
-  return [line(head), ...rows.map(line)].join('\n')
+// Compact, relative age for the table (fmtLocal stays for absolute detail). The
+// header says AGE, so no "ago" suffix and no offset. Clock skew clamps to
+// "just now" rather than printing a negative age.
+export function fmtAge(iso, now = Date.now()) {
+  if (!iso) return '—'
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return '—'
+  const sec = Math.floor((now - t) / 1000)
+  if (sec < 60) return 'just now'
+  if (sec < 3600) return `${Math.floor(sec / 60)}m`
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h`
+  const d = new Date(t)
+  const nd = new Date(now)
+  const startOfToday = new Date(nd.getFullYear(), nd.getMonth(), nd.getDate()).getTime()
+  const pad = n => String(n).padStart(2, '0')
+  if (t >= startOfToday - 86400000 && t < startOfToday) return `yday ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  if (d.getFullYear() === nd.getFullYear()) return `${MON[d.getMonth()]} ${d.getDate()}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// A human reads /grok:status to answer "who needs me?" first, "who's working?"
+// second, "what finished?" last — so rank by tier, not just recency. (Note:
+// `blocked` is intentionally an attention state here even though it is NOT in
+// worker.mjs ACTIVE_STATUSES — a blocked worker is waiting on the captain.)
+const STATUS_TIER = {
+  need_input: 0, advising: 0, blocked: 0, paused: 0,   // attention — waiting on you
+  starting: 1, running: 1,                             // live — burning tokens now
+  done: 2, killed: 2, dead: 2, timeout: 2,             // terminal — history
+}
+const tierOf = s => (s in STATUS_TIER ? STATUS_TIER[s] : 2)   // unknown → terminal
+
+function taskSnippet(task) {
+  if (!task) return '—'
+  const line = String(task).split('\n')[0].replace(/\s+/g, ' ').trim()
+  if (!line) return '—'
+  return line.length > 48 ? line.slice(0, 47) + '…' : line
+}
+
+const TERMINAL_SHOWN = 8   // default view caps history; --all shows everything
+
+export function renderTable(metas, { all = false } = {}) {
+  const items = (Array.isArray(metas) ? metas : []).filter(m => m && m.id)
+  if (items.length === 0) return '(no workers)'
+  items.sort((a, b) => {
+    const ta = tierOf(a.status), tb = tierOf(b.status)
+    if (ta !== tb) return ta - tb
+    return String(b.updatedAt ?? b.createdAt ?? '').localeCompare(String(a.updatedAt ?? a.createdAt ?? ''))
+  })
+  const active = items.filter(m => tierOf(m.status) < 2)
+  const terminal = items.filter(m => tierOf(m.status) === 2)
+  const shownTerminal = all ? terminal : terminal.slice(0, TERMINAL_SHOWN)
+  const hidden = terminal.length - shownTerminal.length
+
+  const head = ['STATUS', 'AGE', 'ID', 'GRIP', 'TASK']
+  const toRow = m => [m.status ?? '—', fmtAge(m.updatedAt ?? m.createdAt), m.id, m.grip ?? '—', taskSnippet(m.task)]
+  const body = [...active.map(toRow), ...shownTerminal.map(toRow)]
+  // widths from header + every body row (TASK is last, left unpadded)
+  const w = head.slice(0, -1).map((h, i) => Math.max(h.length, ...body.map(r => String(r[i]).length)))
+  const line = cols => [...cols.slice(0, -1).map((c, i) => String(c).padEnd(w[i])), cols[cols.length - 1]].join('  ')
+
+  const out = [line(head), ...active.map(m => line(toRow(m)))]
+  if (active.length && shownTerminal.length) out.push('── recent ' + '─'.repeat(Math.max(0, 44)))
+  out.push(...shownTerminal.map(m => line(toRow(m))))
+  if (hidden > 0) {
+    const byStatus = {}
+    for (const m of terminal.slice(shownTerminal.length)) byStatus[m.status] = (byStatus[m.status] ?? 0) + 1
+    const brk = Object.entries(byStatus).map(([s, n]) => `${n} ${s}`).join(', ')
+    out.push(`+ ${hidden} older (${brk}) — grokctl list --table --all`)
+  }
+  return out.join('\n')
 }
 
 function takeFlag(argv, name) {
@@ -249,8 +310,9 @@ async function main() {
   }
   if (cmd === 'list') {
     const table = argv.includes('--table')
+    const all = argv.includes('--all')
     const metas = await rpc('list')
-    if (table) process.stdout.write(renderTable(metas) + '\n')
+    if (table) process.stdout.write(renderTable(metas, { all }) + '\n')
     else out(metas)
     return
   }
