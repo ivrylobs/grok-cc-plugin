@@ -261,3 +261,10 @@ test('advise still auto-allows common review commands (audit 3)', () => {
     'rg -n foo src/ | head -5',
   ]) assert.equal(decide(c), 'allow', c)
 })
+
+test('advise asks on git status -v (renders diff → textconv exec, audit 4)', () => {
+  assert.equal(decide('git status -v'), 'ask', 'git status -v runs the configured textconv driver')
+  assert.equal(decide('git status --verbose'), 'ask', 'git status --verbose too')
+  assert.equal(decide('git status'), 'allow', 'plain git status still allows')
+  assert.equal(decide('git status -sb'), 'allow', 'git status -sb still allows')
+})
