@@ -193,8 +193,35 @@ test('advise asks on quote-evaded git --output (audit)', () => {
   assert.equal(decide('git log --output""=/tmp/x'), 'ask', 'quotes must not hide --output')
 })
 
-// Legitimate quoted reads must survive the quote-strip normalization.
-test('advise still allows a quoted multi-word search pattern (audit)', () => {
-  assert.equal(decide('rg "async fn" .'), 'allow', 'quoted read pattern must allow')
-  assert.equal(decide('grep "TODO" f'), 'allow', 'quoted grep pattern must allow')
+// ─── Second adversarial audit: shell string-transforms defeat raw-string regex ──
+// v2 stripped quotes/backslashes, but brace expansion and ANSI-C quoting still
+// reconstruct danger flags or inject separators. v3 rejects the shell machinery
+// characters outright (quotes, backslash, $, braces, parens, backtick, ; <> &),
+// keeping only globs. Cost: quoted/braced/$-bearing commands now ask.
+
+test('advise asks on brace-expanded find -delete (audit 2)', () => {
+  assert.equal(decide('find . -name x -{delete,print}'), 'ask', 'brace expansion must not hide -delete')
+})
+
+test('advise asks on ANSI-C newline injection (audit 2)', () => {
+  const q = String.fromCharCode(39), bs = String.fromCharCode(92)
+  assert.equal(decide('cat a$' + q + bs + 'n' + q + 'rm -rf x'), 'ask', "$'\\n' expands to a command separator")
+})
+
+test('advise asks on ANSI-C reconstructed flag (audit 2)', () => {
+  const q = String.fromCharCode(39)
+  assert.equal(decide('find . -name x $' + q + '-delete' + q), 'ask', "$'-delete' reconstructs the flag")
+})
+
+test('advise asks on any $ expansion (audit 2)', () => {
+  assert.equal(decide('cat a$(printf x)'), 'ask', 'command substitution must ask')
+  assert.equal(decide('cat ${IFS}a'), 'ask', 'parameter expansion must ask')
+})
+
+// v3 no longer strips quotes, so quoted forms now ASK (safe over-rejection).
+// Unquoted plain reads and globs remain the auto-allow path.
+test('advise asks on quoted commands but allows unquoted reads + globs (audit 2)', () => {
+  assert.equal(decide('rg "async fn" .'), 'ask', 'quoted multi-word pattern now asks (machinery)')
+  assert.equal(decide('rg async src/'), 'allow', 'unquoted single-word search still allows')
+  assert.equal(decide('cat *.js'), 'allow', 'glob still allows — expands to filenames, not commands')
 })
