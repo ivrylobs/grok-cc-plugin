@@ -97,6 +97,33 @@ function fail(err) {
   process.exit(1)
 }
 
+// 0008: timestamps are stored UTC (toISOString). Render them in the host's
+// local zone with an explicit offset so a table never reads a UTC time as local.
+export function fmtLocal(iso) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  const pad = n => String(n).padStart(2, '0')
+  const off = -d.getTimezoneOffset()               // minutes east of UTC
+  const sign = off >= 0 ? '+' : '-'
+  const oh = pad(Math.floor(Math.abs(off) / 60))
+  const om = pad(Math.abs(off) % 60)
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} `
+    + `${pad(d.getHours())}:${pad(d.getMinutes())} ${sign}${oh}${om}`
+}
+
+function renderTable(metas) {
+  if (!Array.isArray(metas) || metas.length === 0) return '(no workers)'
+  const head = ['ID', 'STATUS', 'GRIP', 'MODEL', 'UPDATED (local)']
+  const rows = metas.map(m => [
+    m.id ?? '—', m.status ?? '—', m.grip ?? '—', m.model ?? '—',
+    fmtLocal(m.updatedAt ?? m.createdAt),
+  ])
+  const w = head.map((h, i) => Math.max(h.length, ...rows.map(r => String(r[i]).length)))
+  const line = cols => cols.map((c, i) => String(c).padEnd(w[i])).join('  ')
+  return [line(head), ...rows.map(line)].join('\n')
+}
+
 function takeFlag(argv, name) {
   const i = argv.indexOf(name)
   if (i < 0) return null
@@ -221,7 +248,10 @@ async function main() {
     return
   }
   if (cmd === 'list') {
-    out(await rpc('list'))
+    const table = argv.includes('--table')
+    const metas = await rpc('list')
+    if (table) process.stdout.write(renderTable(metas) + '\n')
+    else out(metas)
     return
   }
   if (cmd === 'status' || cmd === 'result' || cmd === 'inbox' || cmd === 'kill' || cmd === 'resume' || cmd === 'fork') {
@@ -256,4 +286,7 @@ async function main() {
   throw new Error(`unknown command: ${cmd}`)
 }
 
-main().catch(fail)
+// run only as a CLI, not when imported by a test
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main().catch(fail)
+}
