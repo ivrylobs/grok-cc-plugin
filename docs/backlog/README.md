@@ -48,3 +48,4 @@ found: YYYY-MM-DD
 | [0007](0007-done-discards-worker-prose.md) | major | worker | A DONE worker's prose is discarded; only fenced JSON survives | fixed 0.2.0 |
 | [0008](0008-status-table-renders-utc-as-local.md) | minor | docs | Worker timestamps render as UTC but read as local time | fixed 0.2.0 |
 | [0009](0009-git-diff-textconv-runs-configured-programs.md) | major | policy | Auto-allowed `git diff`/`git log -p` run repo-configured textconv/ext-diff (arbitrary code) | fixed 0.2.0 (read); documented (advise/leash) |
+| [0010](0010-prune-crashes-on-malformed-worker-meta.md) | major | worker | `grokctl prune` crashes on a worker dir with a malformed (id-less) meta | fixed 0.2.2 |
