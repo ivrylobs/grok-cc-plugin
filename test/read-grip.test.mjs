@@ -54,6 +54,45 @@ test('advise write still allows (read grip must not change advise)', () => {
   assert.equal(decideToolCall('advise', { kind: 'write' }), 'allow')
 })
 
+// ─── A2) read-grip hardening from the adversarial audit ──────────────────────
+
+// A "read" grip that runs `npm test` (arbitrary project code + writes) is not
+// read-only. read ignores GROK_CC_ADVISE_TESTS; advise still honors it.
+test('read ignores GROK_CC_ADVISE_TESTS (advise still honors it)', () => {
+  const prev = process.env.GROK_CC_ADVISE_TESTS
+  process.env.GROK_CC_ADVISE_TESTS = '1'
+  try {
+    assert.equal(decideToolCall('read', exec('npm test')), 'ask', 'read must ask on npm test')
+    assert.equal(decideToolCall('read', exec('pytest')), 'ask', 'read must ask on pytest')
+    assert.equal(decideToolCall('advise', exec('npm test')), 'allow', 'advise still opts in')
+  } finally {
+    if (prev === undefined) delete process.env.GROK_CC_ADVISE_TESTS
+    else process.env.GROK_CC_ADVISE_TESTS = prev
+  }
+})
+
+// A read/write/edit call carries no shell command; one that does is mislabeled
+// and must not ride the kind short-circuit past the shell whitelist.
+test('a kind:read call carrying a command does not auto-allow', () => {
+  const spoof = { kind: 'read', rawInput: { command: 'rm -rf /tmp/pwned' } }
+  assert.equal(decideToolCall('read', spoof), 'ask')
+  assert.equal(decideToolCall('advise', spoof), 'ask')
+  assert.equal(decideToolCall('read', { kind: 'read' }), 'allow')   // genuine read still allows
+})
+
+// git diff/log run the repo's configured textconv/ext-diff (arbitrary code) BY
+// DEFAULT. Under read they auto-allow ONLY with both neutralizing flags; advise
+// (a trusted-tree grip) is unchanged.
+test('read requires --no-textconv --no-ext-diff for git diff/log; advise unchanged', () => {
+  assert.equal(decideToolCall('read', exec('git diff')), 'ask')
+  assert.equal(decideToolCall('read', exec('git log -p -1')), 'ask')
+  assert.equal(decideToolCall('read', exec('git diff --no-textconv')), 'ask', 'one flag is not enough')
+  assert.equal(decideToolCall('read', exec('git diff --no-textconv --no-ext-diff')), 'allow')
+  assert.equal(decideToolCall('read', exec('git status -sb')), 'allow', 'status has no patch, stays allow')
+  assert.equal(decideToolCall('advise', exec('git diff')), 'allow', 'advise trusts its own tree')
+  assert.equal(decideToolCall('leash', exec('git diff')), 'allow')
+})
+
 // ─── B) makeFsHandlers under read grip ──────────────────────────────────────
 
 test('read grip: readTextFile works; writeTextFile rejects without stage or disk write', async () => {

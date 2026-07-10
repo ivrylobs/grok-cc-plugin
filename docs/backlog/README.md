@@ -37,13 +37,13 @@ found: YYYY-MM-DD
 
 ## Index
 
-| # | Severity | Area | Title |
-|---|----------|------|-------|
-| [0001](0001-advise-blocks-chained-readonly-commands.md) | blocker | policy | `&&`-chained read-only commands force a permission prompt |
-| [0002](0002-advise-allowlist-missing-readonly-heads.md) | major | policy | Allow-list omits `sed -n`, `find`, `head`, `wc`, `test` |
-| [0003](0003-parent-agent-cannot-answer-permissions.md) | ~~blocker~~ major | protocol | Subagent delegation path can't answer permissions and deadlocks (corrected) |
-| [0004](0004-parked-worker-yields-no-partial-output.md) | major | worker | A parked worker returns `null`, discarding work already done |
-| [0005](0005-briefs-omit-context-the-captain-already-has.md) | major | skills | Briefs omit context the captain already gathered |
-| [0006](0006-advise-newline-smuggles-second-command.md) | blocker | policy | A newline smuggles a second, unreviewed command past `advise` |
-| [0007](0007-done-discards-worker-prose.md) | major | worker | A DONE worker's prose is discarded; only fenced JSON survives |
-| [0008](0008-status-table-renders-utc-as-local.md) | minor | docs | Worker timestamps render as UTC but read as local time |
+| # | Severity | Area | Title | Status |
+|---|----------|------|-------|--------|
+| [0001](0001-advise-blocks-chained-readonly-commands.md) | blocker | policy | `&&`-chained read-only commands force a permission prompt | fixed 0.2.0 |
+| [0002](0002-advise-allowlist-missing-readonly-heads.md) | major | policy | Allow-list omits `sed -n`, `find`, `head`, `wc`, `test` | fixed 0.2.0 |
+| [0003](0003-parent-agent-cannot-answer-permissions.md) | ~~blocker~~ major | protocol | Subagent delegation path can't answer permissions and deadlocks (corrected) | fixed 0.2.0 |
+| [0004](0004-parked-worker-yields-no-partial-output.md) | major | worker | A parked worker returns `null`, discarding work already done | deferred (streaming) |
+| [0005](0005-briefs-omit-context-the-captain-already-has.md) | major | skills | Briefs omit context the captain already gathered | open |
+| [0006](0006-advise-newline-smuggles-second-command.md) | blocker | policy | A newline smuggles a second, unreviewed command past `advise` | fixed 0.2.0 |
+| [0007](0007-done-discards-worker-prose.md) | major | worker | A DONE worker's prose is discarded; only fenced JSON survives | fixed 0.2.0 |
+| [0008](0008-status-table-renders-utc-as-local.md) | minor | docs | Worker timestamps render as UTC but read as local time | fixed 0.2.0 |
