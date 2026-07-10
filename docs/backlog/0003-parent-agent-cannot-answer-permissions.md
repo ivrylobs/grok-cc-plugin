@@ -1,28 +1,63 @@
 ---
 id: 0003
-title: "The captain cannot answer a worker's permission prompt"
-severity: blocker
+title: "The subagent delegation path cannot answer permissions and deadlocks"
+severity: major
 area: protocol
 found: 2026-07-10
+corrected: 2026-07-10
 ---
 
-## What happened
+## Correction (2026-07-10)
 
-`skills/advisory-loop/SKILL.md` instructs the captain:
+**The original root cause below was wrong.** It claimed the captain cannot answer
+a worker's permission prompt at all. A live session disproved this: a top-level
+captain ran `grokctl answer <id> allow` ~20 times under auto-mode and every call
+executed. What the classifier actually forbids is narrower:
 
-> Never leave a permission pending — the 30-minute timeout denies and blocks the
-> worker.
+- a **subagent** answering another agent's permission,
+- **re-issuing** a command the classifier already denied,
+- a **script** that auto-approves permissions in a loop.
 
-The captain cannot comply. Under Claude Code's auto-approval mode, the
-classifier refuses to let an agent run `grokctl answer <id> allow`, on the
-grounds that one agent approving another agent's permission request satisfies a
-human-approval gate on the user's behalf. It refused the sub-agent, and then
-refused the top-level agent when it retried.
+The severity is downgraded blocker → major, and the title changed. The real
+defect is in the subagent delegation path (below), not in the captain's ability
+to answer. The original text is kept struck-through for provenance.
 
-The refusal is **correct**. The gate exists so a human decides. An agent
-clearing it for another agent defeats it entirely. But the skill's central
-instruction is written as though the captain can do this, and the design assumes
-it.
+The cost is real but is paid in **captain turns** (one answer call per non-
+allow-listed tool), not in human keystrokes — mitigated hard by fixing
+[0001](0001-advise-blocks-chained-readonly-commands.md)/[0002](0002-advise-allowlist-missing-readonly-heads.md)/[0006](0006-advise-newline-smuggles-second-command.md)
+so read-only reviews never prompt.
+
+## Real root cause: the subagent path has no advisory channel
+
+`agents/grok-worker.md:8-14` delegates by spawning a worker, looping on `wait`,
+then reading `result` — with **no step that drains the inbox or answers a
+permission**. And a subagent genuinely cannot answer one (first bullet above). So
+any worker launched through the `grok-worker` subagent, under any grip that is not
+fully auto-allow, deadlocks on its first prompt and returns `null` (the
+[0004](0004-parked-worker-yields-no-partial-output.md) symptom). `/grok:work`,
+which keeps the top-level captain in the advisory loop, does not have this
+problem.
+
+Fix: either delete `agents/grok-worker.md`, or rewrite it to hand permissions
+back to the top-level captain rather than pretend a subagent can clear them.
+
+---
+
+## Original entry (superseded — kept for provenance)
+
+> `skills/advisory-loop/SKILL.md` instructs the captain:
+>
+> > Never leave a permission pending — the 30-minute timeout denies and blocks the
+> > worker.
+>
+> ~~The captain cannot comply. Under Claude Code's auto-approval mode, the
+> classifier refuses to let an agent run `grokctl answer <id> allow`, on the
+> grounds that one agent approving another agent's permission request satisfies a
+> human-approval gate on the user's behalf. It refused the sub-agent, and then
+> refused the top-level agent when it retried.~~
+>
+> The refusal is **correct** *for the subagent case*. The gate exists so a human
+> decides. An agent clearing it for another agent defeats it entirely.
 
 ## Evidence
 
