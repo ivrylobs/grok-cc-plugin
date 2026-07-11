@@ -1,6 +1,6 @@
 {
   "name": "grok-cc-plugin",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Claude advises, Grok works: veto-gated resumable Grok worker fleet over ACP.",
   "type": "module",
   "license": "MIT",

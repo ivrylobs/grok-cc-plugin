@@ -14,14 +14,33 @@ test('advise allows read-only inspection commands', () => {
     assert.equal(decideToolCall('advise', exec(c)), 'allow', c)
 })
 
+test('advise allows the expanded git read-only subcommands (R5)', () => {
+  for (const c of ['git rev-parse HEAD', 'git rev-parse --show-toplevel', 'git ls-files', 'git ls-files -m', 'git show-ref', 'git show --stat HEAD'])
+    assert.equal(decideToolCall('advise', exec(c)), 'allow', c)
+  // git show carries textconv exposure → under read grip it needs the neutralizing flags
+  assert.equal(decideToolCall('read', exec('git show HEAD')), 'ask')
+  assert.equal(decideToolCall('read', exec('git show --no-textconv --no-ext-diff HEAD')), 'allow')
+  // cat-file was PULLED: `cat-file --textconv` execs a driver, so it must ask (not simple)
+  assert.equal(decideToolCall('read', exec('git cat-file --textconv HEAD:x')), 'ask')
+  assert.equal(decideToolCall('advise', exec('git cat-file -p HEAD')), 'ask')
+  // a global option BEFORE the subcommand (pager/editor override, -C, --git-dir escape)
+  // does not match the `git <sub>` head → falls through → asks. Bypass stays closed.
+  for (const c of ['git -c core.pager=sh rev-parse HEAD', 'git -C /etc rev-parse --show-toplevel', 'git --git-dir=/tmp/x rev-parse HEAD'])
+    assert.equal(decideToolCall('advise', exec(c)), 'ask', c)
+})
+
 test('advise asks for test runners (write-then-run escalation) unless opted in', () => {
   for (const c of ['pytest -q', 'npm test', 'cargo test', 'node --test test/'])
     assert.equal(decideToolCall('advise', exec(c)), 'ask', c)
+  // global env opt-in (back-compat)
   process.env.GROK_CC_ADVISE_TESTS = '1'
   try {
     for (const c of ['npm test', 'pytest -q', 'npm test 2>&1 | tail -5'])
       assert.equal(decideToolCall('advise', exec(c)), 'allow', c)
   } finally { delete process.env.GROK_CC_ADVISE_TESTS }
+  // R5: per-worker grant wins over the (unset) env, and never applies under read
+  assert.equal(decideToolCall('advise', exec('npm test'), { allowTests: true }), 'allow')
+  assert.equal(decideToolCall('read', exec('npm test'), { allowTests: true }), 'ask', 'read grip is never a test runner')
 })
 
 test('advise: a weaponized flag on an allow-listed head still asks', () => {

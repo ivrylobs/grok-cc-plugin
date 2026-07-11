@@ -194,6 +194,14 @@ function takeFlag(argv, name) {
   return v
 }
 
+/** Presence-only flag: removes it from argv, returns true if it was there. */
+function takeBool(argv, name) {
+  const i = argv.indexOf(name)
+  if (i < 0) return false
+  argv.splice(i, 1)
+  return true
+}
+
 function parseSpawn(argv) {
   const task = takeFlag(argv, '--task')
   const cwd = takeFlag(argv, '--cwd')
@@ -201,6 +209,8 @@ function parseSpawn(argv) {
   const effort = takeFlag(argv, '--effort')
   const grip = takeFlag(argv, '--grip')
   const session = takeFlag(argv, '--session')
+  const allowTests = takeBool(argv, '--allow-tests')   // scoped grant: this worker may auto-run test runners
+  const accept = takeFlag(argv, '--accept')            // acceptance command: DONE is invalid until it passes
   if (!task) throw new Error('spawn requires --task')
   if (!cwd) throw new Error('spawn requires --cwd')
   if (argv.length) throw new Error(`unexpected args: ${argv.join(' ')}`)
@@ -209,15 +219,20 @@ function parseSpawn(argv) {
   if (effort != null) args.effort = effort
   if (grip != null) args.grip = grip
   if (session != null) args.sessionId = session
+  if (allowTests) args.allowTests = true
+  if (accept != null) args.accept = accept
   return args
 }
 
 function parseWait(argv) {
   const timeout = takeFlag(argv, '--timeout')
+  const actionable = takeBool(argv, '--actionable')
+  takeBool(argv, '--any')   // accepted alias: wait already returns when ANY watched worker is ready
   const ids = argv.length ? [...argv] : null
   const args = {}
   if (ids) args.ids = ids
   if (timeout != null) args.timeoutSec = Number(timeout)
+  if (actionable) args.actionable = true
   return args
 }
 
@@ -336,6 +351,18 @@ async function main() {
     const data = await rpc('wait', parseWait(argv))
     out(data)
     if (data?.timeout) process.exit(2)
+    return
+  }
+  if (cmd === 'findings') {                       // list a worker's typed findings
+    const id = argv.shift()
+    if (!id) throw new Error('usage: findings <workerId>')
+    out(await rpc('findings', { id }))
+    return
+  }
+  if (cmd === 'finding') {                         // transition one finding's status
+    const id = argv.shift(), findingId = argv.shift(), to = argv.shift()
+    if (!id || !findingId || !to) throw new Error('usage: finding <workerId> <findingId> <reproduced|discarded|accepted|rejected>')
+    out(await rpc('transitionFinding', { id, findingId, to }))
     return
   }
   if (cmd === 'approve-stage') {

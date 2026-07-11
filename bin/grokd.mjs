@@ -3,6 +3,7 @@ import net from 'node:net'
 import fs from 'node:fs'
 import * as store from '../lib/store.mjs'
 import * as worker from '../lib/worker.mjs'
+import * as finding from '../lib/finding.mjs'
 import { applyStage } from '../lib/fs-mediator.mjs'
 
 const SOCK = store.sockPath()
@@ -12,6 +13,7 @@ const SWEEP_MS = Number(process.env.GROK_CC_SWEEP_MS || 30 * 1000)
 let lastActivity = Date.now()
 
 const ACTIVE = () => worker.list().filter(m => ['starting', 'running', 'advising', 'paused', 'need_input'].includes(m.status))
+const BUSY = ['starting', 'running']
 
 function shutdown(code = 0) {
   // Warm slot is broker-owned and never registered as a worker — must reap explicitly.
@@ -40,15 +42,19 @@ const ops = {
   async kill({ id }) { return worker.kill(id) },
   async resume({ id }) { return worker.resume(id) },
   async 'approve-stage'({ id, paths }) { return { applied: applyStage(id, paths ?? null) } },
+  async findings({ id }) { return finding.listFindings(id) },
+  async addFinding({ id, finding: f }) { return finding.addFinding(id, f) },
+  async transitionFinding({ id, findingId, to }) { return finding.transitionFinding(id, findingId, to) },
   async fork({ id }) {
     const m = worker.status(id)
     if (!m?.probes?.['_x.ai/session/fork']) throw new Error('fork not supported by this grok version')
     throw new Error('fork params not yet mapped; spawn with --session <sessionId> to branch manually')  // ponytail: honest v1 limit, upgrade when fork params are probed
   },
-  async wait({ ids = null, timeoutSec = 570 }) {
+  async wait({ ids = null, timeoutSec = 570, actionable = false }) {
     const watched = () => ids ?? worker.list().map(m => m.id)
+    const pass = actionable ? worker.isActionable : m => !BUSY.includes(m.status)
     const ready = () => worker.list()
-      .filter(m => watched().includes(m.id) && !['starting', 'running'].includes(m.status))
+      .filter(m => watched().includes(m.id) && pass(m))
       .map(m => ({ id: m.id, status: m.status }))
     return new Promise(resolve => {
       // Subscribe BEFORE the first ready() check: a wake firing in between would
@@ -94,7 +100,7 @@ function serve() {
     // Nothing is live yet, so anything claiming to run is a corpse from the last broker.
     worker.reconcile()
     worker.prune()
-    setInterval(() => worker.sweep(), SWEEP_MS).unref()
+    setInterval(() => { worker.sweep(); worker.nudgePaused() }, SWEEP_MS).unref()
     setInterval(() => {
       if (!ACTIVE().length && Date.now() - lastActivity > IDLE_EXIT_MS) shutdown(0)
     }, 10 * 60 * 1000).unref()
