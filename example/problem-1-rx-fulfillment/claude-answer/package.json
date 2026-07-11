@@ -1,0 +1,13 @@
+{
+  "name": "rx-fulfillment",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Prescription Fulfillment service — hexagonal TypeScript slice (ClaimRx / DispenseRx / ShipRx).",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts"
+  }
+}
