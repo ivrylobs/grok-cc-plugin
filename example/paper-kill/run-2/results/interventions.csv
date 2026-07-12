@@ -1,0 +1,35 @@
+ts,arm,phase,type,note
+2026-07-12T09:45:56Z,G,solve,approval,bun -e DST probe
+2026-07-12T10:01:40Z,S2,attack,approval,DST gap/overlap probe
+2026-07-12T10:02:10Z,S2,attack,approval,edge probe
+2026-07-12T10:02:46Z,S2,attack,approval,validation/edge probe
+2026-07-12T10:03:14Z,S2,attack,approval,Santiago DST probe
+2026-07-12T10:03:48Z,S2,attack,approval,resolve-across-zones probe
+2026-07-12T10:04:24Z,S2,attack,approval,independent validation checks
+2026-07-12T10:04:57Z,S2,attack,approval,semantic edge probe
+2026-07-12T10:05:23Z,S2,attack,approval,Lord Howe 30-min overlap probe
+2026-07-12T10:06:03Z,S2,attack,approval,St Johns minute-scan probe
+2026-07-12T10:06:56Z,S2,attack,approval,focused bug-hunt scenarios
+2026-07-12T10:07:27Z,S2,attack,approval,UTC sort order probe
+2026-07-12T10:08:00Z,S2,attack,approval,Chatham 45-min edge probe
+2026-07-12T10:09:12Z,S2,attack,approval,Dublin negative-DST probe
+2026-07-12T10:09:54Z,S2,attack,approval,leap-count/biweekly probe
+2026-07-12T10:10:31Z,S2,attack,approval,daily expander comparison
+2026-07-12T10:11:27Z,S2,attack,approval,Paris DST + byMonthDay order
+2026-07-12T10:12:03Z,S2,attack,approval,DENY workspace search (isolation guard)
+2026-07-12T10:13:49Z,S2,attack,approval,Havana DST + pre-start count probe
+2026-07-12T10:14:49Z,S2,attack,approval,DENY (stop probing / finalize)
+2026-07-12T10:15:22Z,S2,attack,approval,final verification (zero violations)
+2026-07-12T10:18:56Z,DC,attack,approval,DST gap/overlap probe
+2026-07-12T10:19:23Z,DC,attack,approval,count/monthly/weekly/until probe
+2026-07-12T10:19:53Z,DC,attack,approval,validation error probe
+2026-07-12T10:20:27Z,DC,attack,approval,southern DST edge probe
+2026-07-12T10:21:03Z,DC,attack,approval,exotic zone probe
+2026-07-12T10:21:31Z,DC,attack,approval,Chatham gap + count/window probe
+2026-07-12T10:21:57Z,DC,attack,approval,MAX_ITER/yearly rule2 probe
+2026-07-12T10:22:27Z,DC,attack,approval,DST resolution comparison
+2026-07-12T10:22:56Z,DC,attack,approval,independent DST compare
+2026-07-12T10:23:31Z,DC,attack,approval,subtle behavioral edge probe
+2026-07-12T10:23:58Z,DC,attack,approval,jump-opt vs count-path probe
+2026-07-12T10:24:46Z,DC,attack,approval,DENY (finalize)
+2026-07-12T10:25:19Z,DC,attack,approval,verify finding 01 repro

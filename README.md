@@ -208,7 +208,13 @@ What we **don't** claim, on purpose:
 - **`leash` is not a sandbox** (see below). Shell under `leash` runs with the broker's privileges.
 - The warm-pool ~2s saving is real-grok handshake time — the offline proof shows the mechanism on the mock, not that number; `proof:live` shows the number.
 - Live wall-clock (`~16s` bugfix) varies with model load; it's an order of magnitude, not an SLA.
-- We make **no** claim to fix bugs "better" than any other tool — the codex plugin couldn't run headless in our environment, so no head-to-head correctness number exists. See [BENCHMARK.md](BENCHMARK.md) for the honest capability matrix.
+- We make **no** claim to fix bugs "better" than any other tool. That isn't a hedge — it's a
+  **measured result**. We ran a pre-registered, blind, adversarial experiment (the *paper-kill*)
+  to test the stronger claim — *does a Grok peer make the code better than solo Claude?* — and it
+  returned **KILL** for greenfield scope. So the 0.4.0 "duel" machinery is deliberately unbuilt.
+  The whole honest story, with the data: **[THESIS.md](THESIS.md)** and
+  **[example/paper-kill/](example/paper-kill/)**. See [BENCHMARK.md](BENCHMARK.md) for the
+  capability matrix.
 
 ### Runtime: node, not bun
 

@@ -1,14 +1,26 @@
 # Changelog
 
-## 0.3.0 — Reliability & Autonomy
+## 0.3.0 — Reliability & Autonomy (the honest floor)
 
 The foundation release: it makes delegated Grok workers run **autonomously to done**
-without babysitting, and lays the substrate the quality surface (0.4.0, gated behind a
-paper-kill experiment) will stand on. No quality claim vs solo Claude — that's the
-0.4.0 thesis, deliberately unproven and unbuilt here.
+without babysitting. It ships with **no claim to out-quality solo Claude** — and that
+isn't a hedge, it's a **result**. We ran a pre-registered, blind, adversarial experiment
+(the "paper-kill") to test whether a Grok peer makes the code *better* than solo Claude,
+and it returned **KILL** for this scope. So the 0.4.0 "duel" machinery is **deliberately
+not built**, and the honest floor is the product. See [`THESIS.md`](THESIS.md) and
+[`example/paper-kill/`](example/paper-kill/).
 
 Every item below turns a measured friction from the benchmark (see `example/`) into a fix.
 Suite grew 119 → 133 tests, all green.
+
+### The honest floor (why 0.4.0 isn't here)
+- **`THESIS.md`** — the quality thesis, tested and killed for greenfield scope, kept in the
+  repo with its data. What died (quality uplift on Claude's home turf), what didn't
+  (throughput; co-thinking on messy code), and what ships instead.
+- **The paper-kill record** — [`example/paper-kill/`](example/paper-kill/): two orthogonal
+  hard problems, both behaviorally saturated (solo Claude = reference quality), design axis
+  favoring solo Claude on the binding grid, autonomy cratered. Pre-registration, protocol,
+  both runs, and the computed [`VERDICT.md`](example/paper-kill/run-2/results/VERDICT.md).
 
 ### Autonomy & reliability
 - **Paused-worker stall fixed (R1).** A turn that ended without a terminal `STATUS` used to
@@ -47,13 +59,19 @@ Suite grew 119 → 133 tests, all green.
   regression before the duel is ever built.
 
 ### Docs
-- `example/0.3.0/` — the full design record: `SHIP-0.3.0.md`, the 40-flaw register, the
-  ambient-ladder UX, and the `NULL-PRODUCT-PRD`, `DUEL-REPORT-SPEC`, and `EXCHANGE-LAW` specs
-  that guide the gated 0.4.0 build.
+- `example/paper-kill/` — the experiment that decided it: pre-registration, protocol, both runs,
+  the hidden scoring suites, and the computed verdict.
+- `example/0.3.0/` — design records from the 0.3.0/0.4.0 planning. `NULL-PRODUCT-PRD` and
+  `EXCHANGE-LAW` describe what actually shipped; `DUEL-REPORT-SPEC`, `AMBIENT-UX`, and `FLAWS`
+  are the design of the 0.4.0 the paper-kill killed — kept as honest history, not a roadmap.
+- `example/problem-1-rx-fulfillment/` — the origin benchmark (solo-Claude 93.5, co-work 85.5,
+  solo-Grok 80.5) that first showed collaboration subtracting, and motivated the whole test.
 
-### Deferred to 0.4.0 (they guard the duel, which the paper-kill must license first)
-- Cost caps (S-5), quality-path grip discipline (S-2), the worktree primitive, the duel + court,
-  the ambient attack tier, and the router.
+### Cut, on purpose (the paper-kill returned KILL)
+- The 0.4.0 duel/court/router, the ambient attack tier, cost caps (S-5), and quality-path grip
+  discipline (S-2) — all deferred machinery that guarded a duel we decided not to build. If the
+  thesis is ever re-opened, it's a new experiment (a different peer model or regime), not a
+  resumed roadmap.
 
 ## 0.2.2 and earlier
 See git history.

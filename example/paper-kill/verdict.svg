@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 340" width="820" height="340" role="img" aria-label="Paper-kill verdict: solo Claude matched reference quality; solo Grok ranked last on design; red-team autonomy cratered">
+  <title>Paper-kill verdict</title>
+  <desc>Three axes from the paper-kill benchmark: BEHAVIORAL — solo Claude hit 100/100 reference quality twice while a flawed foil scored 73; DESIGN — solo Grok ranked last on every blind-grader grid; AUTONOMY — red-team needed 13–22 human approvals per attack and found ~0 real bugs.</desc>
+
+  <rect width="820" height="340" fill="#E9E2D0"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">
+    <!-- header -->
+    <text x="28" y="36" fill="#111111" font-size="15" font-weight="600" letter-spacing="0.14em">PAPER-</text>
+    <text x="92" y="36" fill="#C65E39" font-size="15" font-weight="800" letter-spacing="0.14em">KILL</text>
+    <text x="132" y="36" fill="#111111" font-size="15" font-weight="600" letter-spacing="0.14em"> VERDICT</text>
+    <text x="28" y="58" fill="#6B6255" font-size="12">Does a Grok peer make the code better than solo Claude? Tested twice. No.</text>
+
+    <!-- card frames -->
+    <g fill="none" stroke="#111111" stroke-width="1">
+      <rect x="24" y="78" width="248" height="238" rx="2"/>
+      <rect x="286" y="78" width="248" height="238" rx="2"/>
+      <rect x="548" y="78" width="248" height="238" rx="2"/>
+    </g>
+
+    <!-- accent top rules -->
+    <g stroke="#C65E39" stroke-width="2">
+      <line x1="24" y1="78" x2="272" y2="78"/>
+      <line x1="286" y1="78" x2="534" y2="78"/>
+      <line x1="548" y1="78" x2="796" y2="78"/>
+    </g>
+
+    <!-- card 1: BEHAVIORAL -->
+    <text x="40" y="106" fill="#6B6255" font-size="11" font-weight="700" letter-spacing="0.12em">BEHAVIORAL</text>
+    <text x="40" y="132" fill="#111111" font-size="15" font-weight="700">NO-TEST</text>
+    <text x="40" y="152" fill="#C65E39" font-size="13" font-weight="700">(saturated &#215;2)</text>
+    <text x="40" y="178" fill="#6B6255" font-size="11">solo Claude vs reference</text>
+    <!-- motif: dual 100 bars + foil -->
+    <g font-variant-numeric="tabular-nums">
+      <text x="40" y="210" fill="#111111" font-size="28" font-weight="800">100</text>
+      <text x="96" y="210" fill="#6B6255" font-size="12" font-weight="600">/100 run 1</text>
+      <text x="40" y="242" fill="#111111" font-size="28" font-weight="800">100</text>
+      <text x="96" y="242" fill="#6B6255" font-size="12" font-weight="600">/100 run 2</text>
+      <rect x="40" y="258" width="200" height="6" fill="#111111" opacity="0.12"/>
+      <rect x="40" y="258" width="200" height="6" fill="#111111"/>
+      <rect x="40" y="272" width="200" height="6" fill="#111111" opacity="0.12"/>
+      <rect x="40" y="272" width="146" height="6" fill="#C65E39"/>
+      <text x="40" y="298" fill="#C65E39" font-size="13" font-weight="700">foil 73</text>
+      <text x="92" y="298" fill="#6B6255" font-size="12">suite discriminates</text>
+    </g>
+
+    <!-- card 2: DESIGN -->
+    <text x="302" y="106" fill="#6B6255" font-size="11" font-weight="700" letter-spacing="0.12em">DESIGN</text>
+    <text x="302" y="132" fill="#111111" font-size="15" font-weight="700">solo Grok last,</text>
+    <text x="302" y="152" fill="#C65E39" font-size="13" font-weight="700">every grid</text>
+    <text x="302" y="178" fill="#6B6255" font-size="11">binding blind grader</text>
+    <!-- motif: rank ladder, Grok bottom -->
+    <g font-variant-numeric="tabular-nums" font-size="13">
+      <text x="302" y="212" fill="#111111" font-weight="600">1</text>
+      <rect x="324" y="200" width="168" height="16" fill="#111111" opacity="0.08"/>
+      <text x="332" y="212" fill="#111111" font-weight="600">Claude baseline</text>
+      <text x="302" y="238" fill="#111111" font-weight="600">2</text>
+      <rect x="324" y="226" width="140" height="16" fill="#111111" opacity="0.08"/>
+      <text x="332" y="238" fill="#111111" font-weight="600">Claude peer</text>
+      <text x="302" y="264" fill="#C65E39" font-weight="800">3</text>
+      <rect x="324" y="252" width="112" height="16" fill="#C65E39" opacity="0.18"/>
+      <text x="332" y="264" fill="#C65E39" font-weight="800">solo Grok</text>
+      <text x="302" y="298" fill="#6B6255" font-size="12">run-2: below both baselines</text>
+    </g>
+
+    <!-- card 3: AUTONOMY -->
+    <text x="564" y="106" fill="#6B6255" font-size="11" font-weight="700" letter-spacing="0.12em">AUTONOMY</text>
+    <text x="564" y="132" fill="#111111" font-size="15" font-weight="700">cratered</text>
+    <text x="564" y="152" fill="#C65E39" font-size="13" font-weight="700">not autonomous</text>
+    <text x="564" y="178" fill="#6B6255" font-size="11">red-team attack runs</text>
+    <!-- motif: big approval range + zero bugs -->
+    <g font-variant-numeric="tabular-nums">
+      <text x="564" y="222" fill="#111111" font-size="36" font-weight="800">13–22</text>
+      <text x="564" y="246" fill="#6B6255" font-size="12" font-weight="600">human approvals / attack</text>
+      <text x="564" y="280" fill="#C65E39" font-size="28" font-weight="800">~0</text>
+      <text x="620" y="280" fill="#6B6255" font-size="13" font-weight="600">real bugs found</text>
+    </g>
+  </g>
+</svg>
